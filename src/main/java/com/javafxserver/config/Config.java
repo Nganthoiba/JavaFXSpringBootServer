@@ -1,145 +1,167 @@
 package com.javafxserver.config;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
-/*
- * This class is used to read the configuration file
- * */
+import java.io.*;
+import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
 public class Config {
-	
-	// The key for the server port
-	public static final String SERVER_PORT_KEY = "server_port";
-	public static final String PKCS11 = "PKCS11";
-	public static final String SUN_PKCS11 = "SunPKCS11";
-	
-	public static final String HOME_PATH = System.getProperty("user.home");
-	public static final String APP_PATH = HOME_PATH + File.separator + "DigiSignServerApp";
-	
-	
-	//Storage path
-	public static final String STORAGE_PATH = APP_PATH + File.separator + "storage";
-	
-	//public path
-	public static final String PUBLIC_PATH = System.getProperty("user.dir") + File.separator + "public";	
-	// The path of the epass configuration file
-	public static final String CONFIG_FILE_PATH = APP_PATH + File.separator + "epass_config.cfg";
-	
-	public static String PIN = null; //This will be set when the user enters the correct PIN
-	// The default server port
-	public static final int DEFAULT_SERVER_PORT = 8080;
-	public static final int PROXY_SERVER_PORT = 8081;
-	
-	
-	public static String get(String key) {
-		// This method should read the configuration file and return the value for the given key
-		// For now, we will just return the default values
-		switch (key) {
-			case SERVER_PORT_KEY:
-				return String.valueOf(DEFAULT_SERVER_PORT);
-			default:
-				// If the key is not found, read the configuration file epass_config.cfg
-		    	File configFile = new File(CONFIG_FILE_PATH);
-		    	
-		    	if(configFile.exists()) {
-		    		// Read the file and get the value for the key
-		    		Map<String, String> config = parseConfigFile(configFile.getAbsolutePath());
-		    		if(config.containsKey(key)) {
-		    			return config.get(key);
-		    		}
-		    	} 
-		    	// If the file does not exist, return null
-				return null;
-		}
-	}
-	
-	
-	
-	public static void set(String key, String value) {
-		// This method should write the value to the configuration file for the given key
-		// For now, we will just print the key and value
-		System.out.println("Setting " + key + " to " + value);		
-		File configFile = new File(CONFIG_FILE_PATH);
-		
-		if(configFile.exists()) {
-			// Write the value to the file
-			try {
-				Map<String, String> config = parseConfigFile(configFile.getAbsolutePath());
-				config.put(key, value);
-				// Write the updated config back to the file
-				StringBuilder sb = new StringBuilder();
-				for (Map.Entry<String, String> entry : config.entrySet()) {
-					sb.append(entry.getKey()).append(" = ").append(entry.getValue()).append("\n");
-				}
-				Files.writeString(Paths.get(CONFIG_FILE_PATH), sb.toString());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("Configuration file not found.");
-		}
-	}
-	
-	public static Map<String, String> parseConfigFile(String configFilePath) {
-		// This method should parse the configuration file and return the key-value pairs
-		// For now, we will just return null
-		
-		// Split and parse into key-value pairs
-        Map<String, String> config = new HashMap<>();
-		try {
-			String content = Files.readString(Paths.get(configFilePath));
-			String[] lines = content.split("\\R"); // \\R matches any line break
-			
-			for (String line : lines) {
-				if (line.contains("=")) {
-					String[] keyValue = line.split("=", 2);
-					if (keyValue.length == 2) {
-						config.put(keyValue[0].trim(), keyValue[1].trim());
-					}
-				}
-			}
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		return config;
-	}
-	
-	public static File getConfigFile() {
-		// This method should return the configuration file
-		File configFile = new File(CONFIG_FILE_PATH);
-		return configFile;
-	}
-	
-	//method to set configuration file
-    public static File setConfigFile(String dllFilePath) throws IOException {
-    	
-    	Config.createAppPath();
-    	
-		File configFile = new File(APP_PATH, "epass_config.cfg");
-		configFile.setWritable(true);
-		try (FileWriter writer = new FileWriter(configFile)) {
-			//writer.write("name = ePass2003" + System.currentTimeMillis() + "\n");
-			writer.write("name = ePass2003" + "\n");
-			writer.write("library = " + dllFilePath + "\n");
-			writer.write("slotListIndex  = 0\n");
-			writer.write("attributes = compatibility\n");
-			return configFile;
-		} catch (IOException e) {			
-			throw e;
-		}
-	}
-    
-    //create APP_PATH if not exist
-    public static void createAppPath() {
-    	File directory = new File(APP_PATH);
-    	if (!directory.exists()) {
-    	    directory.mkdirs();
-    	}
+    public static final String PKCS11 = "PKCS11";
+    public static final String SUN_PKCS11 = "SunPKCS11";
+
+    public static final String HOME_PATH = System.getProperty("user.home");
+    public static final String APP_PATH = HOME_PATH + File.separator + "DigiSignServerApp";
+    public static final String CONFIG_FILE_PATH = APP_PATH + File.separator + "config.json";
+
+    public static final String STORAGE_PATH = APP_PATH + File.separator + "storage";
+    public static final String PUBLIC_PATH = System.getProperty("user.dir") + File.separator + "public";
+
+    public static final int DEFAULT_HTTP_PORT = 8080;
+    public static final int DEFAULT_HTTPS_PORT = 8081;
+    public static String PIN = null; // This will be set when the user enters the correct PIN
+
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+    private static Map<String, Object> load() {
+        try {
+            Path path = Paths.get(CONFIG_FILE_PATH);
+            if (!Files.exists(path)) {
+                createDefaultConfig();
+            }
+            String json = Files.readString(path);
+            Type type = new TypeToken<Map<String, Object>>() {}.getType();
+            return gson.fromJson(json, type);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
     }
-}
+
+    public static void saveConfig(Map<String, Object> config) {
+        try {
+            Files.createDirectories(Paths.get(APP_PATH));
+            try (Writer writer = new FileWriter(CONFIG_FILE_PATH)) {
+                gson.toJson(config, writer);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void createDefaultConfig() throws IOException {
+        Map<String, Object> defaultConfig = new HashMap<>();
+        defaultConfig.put("http_port", DEFAULT_HTTP_PORT);
+        defaultConfig.put("https_port", DEFAULT_HTTPS_PORT);
+        defaultConfig.put("cors_origins", new ArrayList<String>());
+        defaultConfig.put("epass_config", new HashMap<String, Object>());
+        saveConfig(defaultConfig);
+    }
+
+    public static int getHttpPort() {
+        Map<String, Object> config = load();
+        return ((Number) config.getOrDefault("http_port", DEFAULT_HTTP_PORT)).intValue();
+    }
+
+    public static int getHttpsPort() {
+        Map<String, Object> config = load();
+        return ((Number) config.getOrDefault("https_port", DEFAULT_HTTPS_PORT)).intValue();
+    }
+
+    public static List<String> getCorsOrigins() {
+        Map<String, Object> config = load();
+        Object obj = config.get("cors_origins");
+        if (obj instanceof List) {
+            return (List<String>) obj;
+        }
+        return new ArrayList<>();
+    }
+
+    public static void setHttpPort(int port) {
+        Map<String, Object> config = load();
+        config.put("http_port", port);
+        saveConfig(config);
+    }
+
+    public static void setHttpsPort(int port) {
+        Map<String, Object> config = load();
+        config.put("https_port", port);
+        saveConfig(config);
+    }
+
+    public static void setCorsOrigins(List<String> origins) {
+        Map<String, Object> config = load();
+        config.put("cors_origins", origins);
+        saveConfig(config);
+    }
+
+    public static void addCorsOrigin(String origin) {
+        List<String> origins = getCorsOrigins();
+        if (!origins.contains(origin)) {
+            origins.add(origin);
+            setCorsOrigins(origins);
+        }
+    }
+
+    public static void removeCorsOrigin(String origin) {
+        List<String> origins = getCorsOrigins();
+        if (origins.contains(origin)) {
+            origins.remove(origin);
+            setCorsOrigins(origins);
+        }
+    }
+
+    public static Map<String, Object> getEpassConfig() {
+        Map<String, Object> config = load();
+        Object obj = config.get("epass_config");
+        if (obj instanceof Map) {
+            return (Map<String, Object>) obj;
+        }
+        return new HashMap<>();
+    }
+
+    public static String getEpassValue(String key) {
+        Object val = getEpassConfig().get(key);
+        return val != null ? val.toString() : null;
+    }
+
+    public static void setEpassConfigValue(String key, Object value) {
+        Map<String, Object> config = load();
+        Map<String, Object> epass = getEpassConfig();
+        epass.put(key, value);
+        config.put("epass_config", epass);
+        saveConfig(config);
+    }
+
+    public static File createTemporaryPKCS11Config() throws IOException {
+        Map<String, Object> epassConfig = getEpassConfig();
+
+        File tempFile = File.createTempFile("epass_config", ".cfg");
+        tempFile.deleteOnExit();
+
+        try (FileWriter writer = new FileWriter(tempFile)) {
+            writer.write("name = " + epassConfig.getOrDefault("name", "ePass2003") + "\n");
+            writer.write("library = " + epassConfig.get("library") + "\n");
+            writer.write("slotListIndex = " + epassConfig.getOrDefault("slotListIndex", 0) + "\n");
+            writer.write("attributes = " + epassConfig.getOrDefault("attributes", "compatibility") + "\n");
+        }
+
+        return tempFile;
+    }
+
+    public static Object get(String key) {
+        Map<String, Object> config = load();
+        return config.get(key);
+    }
+
+    public static void set(String key, Object value) {
+        Map<String, Object> config = load();
+        config.put(key, value);
+        saveConfig(config);
+    }
+} 

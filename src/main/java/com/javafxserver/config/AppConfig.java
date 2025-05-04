@@ -3,7 +3,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication(scanBasePackages = {"com.javafxserver", "com.javafxserver.web", "com.javafxserver.web.controllers"})
+@SpringBootApplication(scanBasePackages = {"com.javafxserver", "com.javafxserver.service", "com.javafxserver.web", "com.javafxserver.web.controllers"})
 @Configuration
 public class AppConfig {	
 	

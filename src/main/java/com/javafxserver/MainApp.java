@@ -1,8 +1,5 @@
 package com.javafxserver;
 
-
-
-import com.javafxserver.config.Config;
 import com.javafxserver.fxcontrollers.MainViewController;
 import com.javafxserver.service.ServerServiceHandler;
 import com.javafxserver.utils.LogWriter;
@@ -18,12 +15,11 @@ public class MainApp extends Application{
 		
 	@Override
     public void init() {
-		Config.createAppPath();
+		//Config.createAppPath();
     }
 	
 	private void loadCss(Scene scene) {
 		String css = getClass().getResource("/styles/application.css").toExternalForm();
-		System.out.println(css);
 		scene.getStylesheets().add(css);
 	}
 	

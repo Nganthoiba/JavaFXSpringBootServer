@@ -17,6 +17,8 @@ import com.javafxserver.utils.ConvertFile;
 import com.javafxserver.digitalsigner.Coordinate;
 import com.javafxserver.digitalsigner.PDFSigner;
 import com.javafxserver.digitalsigner.SignatureDetail;
+import com.javafxserver.digitalsigner.TokenManager;
+import com.javafxserver.exceptions.EmptyPinException;
 import com.javafxserver.exceptions.HandleExceptionMessage;
 
 
@@ -37,22 +39,34 @@ public class AppController {
                 throw new IllegalArgumentException("No file is uploaded");
             }
 
-            String secretPin = PinPrompt.requestUserPinBlocking(pin -> {
-                if (Config.PIN != null && !pin.equals(Config.PIN)) {
-                    return false;
-                }
-                return true;
-            });
-
-            TokenService tokenService = new TokenService();
-            tokenService.cleanup();
-            tokenService.detectToken(Config.getConfigFile(), secretPin);
-
+            if(!TokenManager.isUSBTokenPresent()) {
+            	if(TokenManager.tokenError != null) {
+            		//throw new Exception(TokenManager.tokenError.getTitle()+": "+TokenManager.tokenError.getMessage());
+            		TokenManager.tokenError.displayErrorDialog();
+            	}
+            	
+            	String secretPin = PinPrompt.requestUserPinBlocking(pin -> {
+	                if (Config.PIN != null && !pin.equals(Config.PIN)) {
+	                    return false;
+	                }
+	                return true;
+	            });
+            	
+            	Config.PIN = secretPin;           	
+            	
+            }
+            
+            if(Config.PIN == null) {
+            	throw new EmptyPinException("You have not enter secret PIN");
+            }
+            
+            TokenManager.initializeToken(Config.PIN);
+            
             SignatureDetail signDetail = new SignatureDetail();
             signDetail.coordinate = new Coordinate(x, y);
             signDetail.location = location;
             tempFile = ConvertFile.toFile(multipartFile);
-            signedPdfBytes = PDFSigner.signPDF(tempFile, secretPin, tokenService, signDetail);
+            signedPdfBytes = PDFSigner.signPDF(tempFile, Config.PIN, TokenManager.tokenService, signDetail);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
@@ -63,6 +77,8 @@ public class AppController {
                     .body(signedPdfBytes);
 
         } catch (IllegalArgumentException e) {
+        	Config.PIN = null;
+        	e.printStackTrace();
         	String messageString = HandleExceptionMessage.getMessage(e);
             Map<String, Object> errorBody = new HashMap<>();
             errorBody.put("message", messageString);
@@ -73,6 +89,8 @@ public class AppController {
                     .body(errorBody);
 
         } catch (Exception e) {
+        	Config.PIN = null;
+        	e.printStackTrace();
         	String messageString = HandleExceptionMessage.getMessage(e);
             Map<String, Object> errorBody = new HashMap<>();
             errorBody.put("message", messageString);
@@ -87,5 +105,12 @@ public class AppController {
                 tempFile.delete();
             }
         }
+    }
+    
+    @GetMapping("/api/test")
+    public Map<String, String> testApi() {
+    	Map<String, String> responseMap = new HashMap<>();
+    	responseMap.put("message", "Hello, World!");
+        return responseMap;
     }
 }

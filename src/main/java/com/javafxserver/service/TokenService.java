@@ -15,6 +15,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.javafxserver.config.Config;
@@ -48,8 +49,9 @@ public class TokenService {
         }
         
         String currentPin = result.get().trim();
+        Config.setEpassConfigValue("library", dllFile.getAbsolutePath());
                 
-        File configFile = dllFile == null? Config.getConfigFile(): Config.setConfigFile(dllFile.getAbsolutePath());
+        File configFile = Config.createTemporaryPKCS11Config();
         return detectToken(configFile, currentPin);        
     }
 	
@@ -101,9 +103,17 @@ public class TokenService {
     public Provider getPkcs11Provider() {
         return pkcs11Provider;
     }
+    
+    public void setPkcs11Provider(Provider provider) {
+        this.pkcs11Provider = provider;
+    }
 
     public KeyStore getKeyStore() {
         return keyStore;
+    }
+    
+    public void setKeyStore(KeyStore keyStore) {
+        this.keyStore = keyStore;
     }
     
     public TokenDetails getTokenDetails() {
@@ -169,9 +179,11 @@ public class TokenService {
     public void cleanup() {
         try {
             if (pkcs11Provider != null) {
+            	Map<String, Object> epassConfig = Config.getEpassConfig();
+            	
                 Security.removeProvider(pkcs11Provider.getName());
-              //Logout from the token
-               JnaPkcs11Logout.logoutToken(Config.get("library"));
+                //Logout from the token
+                JnaPkcs11Logout.logoutToken(epassConfig.get("library").toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

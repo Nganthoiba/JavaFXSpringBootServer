@@ -40,28 +40,34 @@ public class TomcatConfig {
         tomcat.addAdditionalTomcatConnectors(httpConnector());
         return tomcat;
     }
-
-    private Connector httpConnector() {
+	
+	private Connector httpConnector() {	
+		
         Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
         connector.setScheme("http");
         connector.setPort(httpPort);
-        connector.setSecure(false);
+        connector.setSecure(true);
         connector.setRedirectPort(httpsPort);
         return connector;
     }
+
+    
 
 }
 
 */
 
 @Configuration
-public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
-
-    @Value("${server.http.port}")
-    private int httpPort;
-
+public class TomcatConfig implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {    
+	
+	
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
+    	int httpPort = Config.getHttpPort();
+    	int httpsPort= Config.getHttpsPort();
+    	
+    	factory.setPort(httpsPort); 
+    	
         Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
         connector.setPort(httpPort);
         factory.addAdditionalTomcatConnectors(connector);

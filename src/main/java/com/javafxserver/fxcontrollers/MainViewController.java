@@ -1,25 +1,20 @@
 package com.javafxserver.fxcontrollers;
 
 import java.io.File;
-import org.springframework.stereotype.Component;
-
 import com.javafxserver.config.Config;
 import com.javafxserver.exceptions.HandleExceptionMessage;
 import com.javafxserver.service.ServerServiceHandler;
 import com.javafxserver.utils.LogWriter;
-import com.javafxserver.utils.PropertyReader;
 import com.javafxserver.utils.UIUtils;
 
 import javafx.application.HostServices;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-@Component
 public class MainViewController {	
 
     @FXML private TextField epassDriverFilePath;
@@ -27,6 +22,7 @@ public class MainViewController {
     @FXML private Button startServerButton;
     @FXML private Button stopServerButton;
     @FXML private Button launchDemoButton;
+    @FXML private Button settingsButton;
     @FXML private TextArea consoleTextArea;
     
     private File selectedDriverFile;
@@ -35,13 +31,18 @@ public class MainViewController {
     
 
     @FXML
-    public void initialize() {        
-        String libraryPath = Config.get("library");
+    public void initialize() {
+        String libraryPath = Config.getEpassValue("library");
         if (libraryPath != null && !libraryPath.trim().isEmpty()) {            
             selectedDriverFile = new File(libraryPath);
             epassDriverFilePath.setText(libraryPath);
         }
-               
+          
+        // Open the settings dialog on click
+        settingsButton.setOnAction(e -> {
+            SettingDialogExample settingDialog = new SettingDialogExample();
+            settingDialog.openSettingsDialog(); // Method we created in SettingsDialogExample
+        });
     }
 
     @FXML
@@ -57,7 +58,7 @@ public class MainViewController {
         	selectedDriverFile = file;
             epassDriverFilePath.setText(file.getAbsolutePath());
             try{
-            	Config.setConfigFile(file.getAbsolutePath());
+            	Config.setEpassConfigValue("library",file.getAbsolutePath());
             }
             catch(Exception e) {
             	log(e.getMessage());
@@ -76,10 +77,9 @@ public class MainViewController {
             return;
         }    	
     	
-    	//Reading application.properties    	
-    	PropertyReader propertyReader = new PropertyReader();
-    	int httpPort = Integer.parseInt(propertyReader.getProperty("server.http.port", "8080"));
-    	int httpsPort = Integer.parseInt(propertyReader.getProperty("server.port", "8443"));
+    	
+    	int httpPort = Config.getHttpPort();
+    	int httpsPort = Config.getHttpsPort();
     	
     	if(arePortsInUse(httpPort, httpsPort)) {
     		log("Server could not be started due to port(s) already in used.");
@@ -104,7 +104,7 @@ public class MainViewController {
     	};
     	
     	serverStartTask.setOnSucceeded(event -> {
-    		log("Server running at http://localhost:"+httpPort+"\nAnd https://localhost:"+httpsPort);
+    		log("Server running at http://localhost:"+httpPort+" and https://localhost:"+httpsPort);
             switchServerButtons(true);
         });
     	
@@ -139,12 +139,13 @@ public class MainViewController {
     
     @FXML
     public void openDemoInBrowser(ActionEvent event) {
-    	String url = "https://localhost:8443/demo";
+    	int httpPort = Config.getHttpPort();
+    	String url = "http://localhost:" + httpPort + "/demo";
     	if(hostServices != null) {
     		hostServices.showDocument(url);
     	}
     	else {
-    		log("Host services not initialized");
+    		log("Host services are not initialized");
     	}
         
     }

@@ -8,7 +8,7 @@ import com.javafxserver.config.Config;
 
 public class LogWriter {
 	public static void writeLog(String logMessage) {
-		Config.createAppPath();
+		//Config.createAppPath();
 		String logFilePath = Config.APP_PATH + File.separator + "DigiSignLog.log";
 		File logFile = new File(logFilePath);
 

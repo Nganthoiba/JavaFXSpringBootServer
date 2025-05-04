@@ -36,11 +36,12 @@ public class TokenUtil {
 	public static Provider loadPkcs11Provider(String name, String library, int slotIndex) 
 			throws SunPKCS11NotFoundException, IOException {
 		// Create a temporary configuration file
-        Path configFile = Files.createTempFile("pkcs11", ".cfg");
+        Path configFile = Files.createTempFile(Config.APP_PATH + File.separator + "pkcs11", ".cfg");
         String config = String.format(
             "name = %s%n" +
             "library = %s%n" +
-            "slotListIndex = %d%n",
+            "slotListIndex = %d%n" +
+            "attributes = compatibility",
             name, library, slotIndex
         );
         Files.write(configFile, config.getBytes());

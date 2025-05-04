@@ -136,7 +136,7 @@ public class ProxyServer {
             }
 
             // Forward the request to the MiniServer
-            String miniServerUrl = "http://localhost:" + Config.DEFAULT_SERVER_PORT + path;
+            String miniServerUrl = "http://localhost:" + Config.getHttpPort() + path;
             URI uri = new URI(miniServerUrl);
             URL url = uri.toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
