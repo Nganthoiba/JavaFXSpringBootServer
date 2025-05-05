@@ -42,6 +42,7 @@ public class MainApp extends Application{
 	        primaryStage.setScene(scene);
 	        primaryStage.setTitle("Digital Signature Mini Server Application");
 	        primaryStage.show();
+	        System.out.println("DigiSignServer started...");
     	}
     	catch (Exception e) {
 			// TODO: handle exception

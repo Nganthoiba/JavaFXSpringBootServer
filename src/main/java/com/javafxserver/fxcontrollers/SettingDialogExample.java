@@ -107,13 +107,12 @@ public class SettingDialogExample extends Application {
         try {
         	httpPortField.setText(String.valueOf(Config.getHttpPort()));
         	httpsPortField.setText(String.valueOf(Config.getHttpsPort()));
-        	originListView.getItems().setAll(Config.getCorsOrigins());
-        	
-        	System.out.println(String.valueOf(Config.getHttpPort()));
-        	System.out.println(String.valueOf(Config.getHttpsPort()));
+        	originListView.getItems().setAll(Config.getCorsOrigins());        	
         } catch (Exception e) {
             e.printStackTrace();
         }
+        httpPortField.setDisable(true);
+        httpsPortField.setDisable(true);
         
     }
 
