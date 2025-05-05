@@ -47,7 +47,7 @@ public class PDFSigner {
         }
         String location = signDetail != null?signDetail.location:"";
         float x = signDetail != null? signDetail.coordinate.X:360;
-        float y = signDetail != null? signDetail.coordinate.Y:150;
+        float y = signDetail != null? signDetail.coordinate.Y:30;
         
       
         //Get the first page usually

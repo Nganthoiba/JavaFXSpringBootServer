@@ -40,9 +40,9 @@ public class AppController {
             }
 
             if(!TokenManager.isUSBTokenPresent()) {
-            	if(TokenManager.tokenError != null) {
-            		//throw new Exception(TokenManager.tokenError.getTitle()+": "+TokenManager.tokenError.getMessage());
+            	if(Config.PIN != null && TokenManager.tokenError != null) {
             		TokenManager.tokenError.displayErrorDialog();
+            		throw new Exception(TokenManager.tokenError.getTitle()+": "+TokenManager.tokenError.getMessage());            		
             	}
             	
             	String secretPin = PinPrompt.requestUserPinBlocking(pin -> {
