@@ -95,10 +95,6 @@ public class TokenManager {
         	tokenService.setPkcs11Provider(null); 
         	tokenService.setKeyStore(null);
         	return false;
-        	/*
-        	tokenError = new Error("Load failed", 
-                    "Unable to load usb token, please inject it properly: " + ex.getMessage());
-        	return false;*/
         }
 		return true;
 	}
