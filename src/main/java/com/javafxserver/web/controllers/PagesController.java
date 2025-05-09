@@ -28,4 +28,9 @@ public class PagesController {
 	public String esignPDF() {
 		return "esignPDF";
 	}
+	
+	@GetMapping("/esignJSON")
+	public String esignJSON() {
+		return "esignJSON";
+	}
 }

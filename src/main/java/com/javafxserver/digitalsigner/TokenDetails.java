@@ -36,10 +36,7 @@ public class TokenDetails {
 		if (alias == null) {
 			throw new IOException("No certificates found in token.");
 		}
-		// Validate the PIN with the token
-        if (!TokenUtil.isTokenPresent(pkcs11Provider, pin.toCharArray())) {
-            throw new IOException("Invalid token: Token is not present.");
-        }
+		
 		PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, pin.toCharArray());
 		return privateKey;
     }

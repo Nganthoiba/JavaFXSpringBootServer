@@ -1,6 +1,7 @@
 package com.javafxserver.digitalsigner;
 
 import java.security.PublicKey;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,6 +72,25 @@ public class CertificateInfo {
 		NAME_TO_FULLFORM_MAP.put("DC", "Domain Component");
 		NAME_TO_FULLFORM_MAP.put("EMAILADDRESS", "Email Address");
 	}
+    
+    //Constructor
+    public CertificateInfo() {
+    	
+    }
+    
+    public CertificateInfo(String alias, X509Certificate cert) throws Exception {
+    	
+    	this.alias = alias;
+    	this.subjectDN = cert.getSubjectX500Principal().getName();
+    	
+    	this.issuerDN = cert.getIssuerX500Principal().getName();
+    	this.validFrom = cert.getNotBefore();
+    	this.validTo = cert.getNotAfter();
+    	this.publicKey = cert.getPublicKey();
+    	
+    	this.parseSubjectDN();
+    	this.parseIssuerDN(); 
+    }
 
 
     // Getters and setters...
@@ -109,6 +129,10 @@ public class CertificateInfo {
 	public void setAlias(String alias2) {
 		// TODO Auto-generated method stub
 		this.alias = alias2;
+	}
+	
+	public String getAlias() {
+		return this.alias;
 	}
 	
 	public void setSubjectDN(String subjectDN2) {

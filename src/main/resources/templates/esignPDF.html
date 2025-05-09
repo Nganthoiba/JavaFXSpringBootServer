@@ -1,83 +1,113 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>eSign Upload</title>
-		
-		<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
-		<link rel="stylesheet" th:href="@{/css/style.css}" />
-	</head>
-	<body>
-	 	<h3 class="text-center">Upload PDF File to be Digitally Signed</h3>
-	  
-		<div class="row">
-			<div class="col-sm-5">
-				<form action="/uploadPDFtoEsign" method="POST" enctype="multipart/form-data"  name="esignPdfForm">
-				      <div class="form-group">
-				        <label for="file">Select file to upload:</label>
-				        <input type="file" id="file" name="my_file" accept=".pdf" required />
-				      </div>
-				      <div class="form-group">
-				        <label>Set coordinates for signature:</label>
-				        <div class="d-flex justify-content-between">
-				          <div class="d-flex">
-				            <label for="x">X:</label>
-				            <input type="number" id="x" name="x" value="360"/>
-				          </div>
-				          <div class="d-flex">
-				            <label for="y">Y:</label>
-				            <input type="number" id="y" name="y" value="30"/>
-				          </div>
-				        </div>
-				      </div>
-				      <div class="form-group">
-				        <label for="location">Location:</label>
-				        <input type="text" id="location" name="location" />
-				      </div>
-				      <button type="submit">Upload & E-Sign</button>
-				</form>
-			</div>
-			<div class="col-sm-7" id="serverResponse"></div>
-		  </div>
-		  
-		  <script>
-		  	var esignPdfForm = document.forms['esignPdfForm'];
-		    esignPdfForm.onsubmit = async function(event) {
-	        	event.preventDefault();
+<head>
+    <title>eSign Upload</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+    <div class="container my-2">
+        <h3 class="text-center">Upload PDF File to be Digitally Signed</h3>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <form id="esignPdfForm" action="/api/esignPDF" method="POST" enctype="multipart/form-data">
+                    <div class="form-group mb-3">
+                        <label for="file">Select file to upload:</label>
+                        <input type="file" id="file" name="pdf_file" accept=".pdf" required class="form-control" aria-label="Upload PDF File">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Set coordinates for signature:</label>
+                        <div class="d-flex gap-3">
+                            <div>
+                                <label for="x">X:</label>
+                                <input type="number" id="x" name="x" value="340" class="form-control">
+                            </div>
+                            <div>
+                                <label for="y">Y:</label>
+                                <input type="number" id="y" name="y" value="760" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+					<div class="form-group mb-3">
+                        <label for="file">Page number where the signature will appear:</label>
+                        <input type="number" id="pageNo" name="pageNo" value = "1" class="form-control">
+                    </div>
+					<div class="form-group mb-3">
+                        <label for="location">Reason:</label>
+                        <input type="text" id="reason" name="reason" class="form-control">
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="location">Location:</label>
+                        <input type="text" id="location" name="location" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Upload & E-Sign</button>
+                </form>
+            </div>
+            <div class="col-md-7" id="serverResponse">
+                <!-- Lazy-loaded server response -->
+            </div>
+        </div>
+    </div>
 
-	        	const formData = new FormData(esignPdfForm);
+    <script th:src="@{/js/bootstrap.bundle.js}" defer></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const esignPdfForm = document.getElementById("esignPdfForm");
 
-	            try {
-	                  const response = await fetch(esignPdfForm.action, {
-	                      method: "POST",
-	                      body: formData,
-	                      headers: {
-	                          'Accept': 'application/json'
-	                      }
-	                  });
+            esignPdfForm.onsubmit = async function(event) {
+                event.preventDefault();
 
-	                  if (!response.ok) {
-	                      const responseData = await response.json();
-	                      throw new Error(responseData.message || "An error occurred");
-	                  }
+                const formData = new FormData(esignPdfForm);
+                const serverResponseDiv = document.getElementById("serverResponse");
 
-	                  // Get the PDF as a Blob
-	                  const pdfBlob = await response.blob();
+                try {
+					serverResponseDiv.innerHTML = "Wait please ...";
+                    const response = await fetch(esignPdfForm.action, {
+                        method: "POST",
+                        body: formData,
+                        headers: { 'Accept': 'application/json' }
+                    });
 
-	                  // Create a URL for the Blob
-	                  const pdfUrl = URL.createObjectURL(pdfBlob);
+                    if (!response.ok) {
+                        const responseData = await response.json();
+                        throw new Error(responseData.message || "An error occurred");
+                    }
 
-	                  // Embed the PDF in an iframe
-	                  const iframe = document.createElement('iframe');
-	                  iframe.src = pdfUrl;
-	                  iframe.width = "100%";
-	                  iframe.height = "600px";
-	                  document.querySelector("#serverResponse").innerHTML = ""; // Clear previous content
-	                  document.querySelector("#serverResponse").appendChild(iframe);
-	              } catch (error) {
-	                  console.error("Error in client-side request:", error);
-	                  alert(error.message); // Display the error message to the user
-	              }
-	          };
-	      </script>  	
-	</body>
+                    // Lazy load the response
+                    const pdfBlob = await response.blob();
+                    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+                    // Create a hidden iframe
+                    const iframe = document.createElement("iframe");
+                    iframe.src = pdfUrl;
+                    iframe.width = "100%";
+                    iframe.height = "600px";
+                    iframe.style.display = "none";
+
+                    serverResponseDiv.innerHTML = "";
+                    serverResponseDiv.appendChild(iframe);
+
+                    // Use IntersectionObserver for lazy loading
+                    const observer = new IntersectionObserver(entries => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                iframe.style.display = "block";  // Reveal iframe when in view
+                                observer.disconnect();  // Stop observing once loaded
+                            }
+                        });
+                    });
+
+                    observer.observe(serverResponseDiv);
+                } catch (error) {
+                    console.error("Error in client-side request:", error);
+					serverResponseDiv.innerHTML = error.message;
+                    alert(error.message);
+                }
+            };
+        });
+    </script>
+</body>
 </html>

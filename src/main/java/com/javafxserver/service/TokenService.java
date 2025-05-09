@@ -7,6 +7,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
+import java.security.ProviderException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
@@ -16,62 +17,42 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import com.javafxserver.config.Config;
-import com.javafxserver.exceptions.EmptyPinException;
 import com.javafxserver.exceptions.EpassTokenDetectionException;
 import com.javafxserver.exceptions.InvalidPinException;
 import com.javafxserver.exceptions.SunPKCS11NotFoundException;
-import com.javafxserver.ui.PasswordDialog;
-
 import com.javafxserver.utils.TokenUtil;
-import com.javafxserver.utils.UIUtils;
 import com.javafxserver.digitalsigner.CertificateInfo;
-import com.javafxserver.digitalsigner.JnaPkcs11Logout;
+import com.javafxserver.digitalsigner.JnaPkcs11;
 import com.javafxserver.digitalsigner.TokenDetails;
 
 public class TokenService {
 	private Provider pkcs11Provider;
     private KeyStore keyStore;
-    private char[] currentPin;
-    
-	public boolean loadTokenDriver(File dllFile) throws Exception {
-        Optional<String> result = new PasswordDialog().showAndWait();       
-        
-        if(!result.isPresent()) {
-        	UIUtils.showAlert("PIN Cancelled", "You have cancelled the PIN entry.");
-    		throw new Exception("PIN Entry Cancelled by User.");
-        }
-        
-        if (result.isEmpty() || result.get().trim().isEmpty()) {
-            throw new EmptyPinException("PIN cannot be empty.");
-        }
-        
-        String currentPin = result.get().trim();
-        Config.setEpassConfigValue("library", dllFile.getAbsolutePath());
-                
-        File configFile = Config.createTemporaryPKCS11Config();
-        return detectToken(configFile, currentPin);        
-    }
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
+    private char[] currentPin;    
 	
 	public boolean detectToken(File configFile, String secretPin) 
-			throws EpassTokenDetectionException,  
-			InvalidPinException, 
-			KeyStoreException,
+			throws KeyStoreException, 
+			EpassTokenDetectionException, 
 			NoSuchAlgorithmException, 
 			CertificateException, 
-			SunPKCS11NotFoundException,			
 			IOException, 
-			UnrecoverableKeyException{
+			UnrecoverableKeyException, 
+			InvalidPinException 
+	{
 		
-		// Load the PKCS#11 provider using the configuration file (fresh)
+		// Load the PKCS#11 provider using the configuration file (fresh)		
         try {
 			pkcs11Provider = TokenUtil.loadPkcs11ProviderFromFile(configFile);
-			
-		} catch (Exception e) {
-			throw new EpassTokenDetectionException("Error in loading pkcs11 provider from configuration file: "
-			+configFile.getAbsolutePath(), e);
+		} catch (SunPKCS11NotFoundException e) {
+			System.out.println("Error loading PKCS#11 provider: " + e.getMessage());
+			throw new EpassTokenDetectionException("Failed to get provider- "+e.getMessage(), e);
+		}
+        catch(ProviderException e) {
+			System.out.println("Error initializing PKCS#11 provider: " + e.getMessage());
+			throw new EpassTokenDetectionException("Failed to initialize provider- "+e.getMessage(), e);
 		}
         
         Security.addProvider(pkcs11Provider);
@@ -87,9 +68,12 @@ public class TokenService {
         }
         
         String alias = aliases.nextElement();
+        
+        X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+        publicKey = cert.getPublicKey();
 
         // This line is **key** to ensure the PIN is valid
-        PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, secretPin.toCharArray());
+        privateKey = (PrivateKey) keyStore.getKey(alias, secretPin.toCharArray());
         if (privateKey == null) {
 			throw new InvalidPinException("Failed to retrieve private key. Invalid PIN or no key found.");
 		}
@@ -121,26 +105,32 @@ public class TokenService {
 		return tokenDetails;
 	}
     
+    public PrivateKey getPrivateKey() {
+    	return privateKey;
+    }
+    
     public PrivateKey getPrivateKey(String pin) throws IOException, InvalidPinException, KeyStoreException, UnrecoverableKeyException, NoSuchAlgorithmException{
+    	    	
     	Enumeration<String> aliases = keyStore.aliases();
     	String alias = aliases.hasMoreElements() ? aliases.nextElement() : null;
+    	
 		if (alias == null) {
 			throw new IOException("No certificates found in token.");
 		}
 		
-		// Validate the PIN with the token
-        if (!TokenUtil.isTokenPresent(pkcs11Provider, pin.toCharArray())) {
-            throw new IOException("Invalid token: Token is not present.");
-        }
-        
-		PrivateKey privateKey = (PrivateKey) keyStore.getKey(alias, pin.toCharArray());
+		privateKey = (PrivateKey) keyStore.getKey(alias, pin.toCharArray());
 		if(privateKey == null) {
 			throw new InvalidPinException("Failed to retrieve private key. Invalid PIN or no key found.");
 		}
 		return privateKey;
     }
     
-    public PublicKey getPublicKey() throws Exception{
+    public PublicKey getPublicKey() throws KeyStoreException, IOException{
+    	
+    	if(publicKey != null) {
+    		return publicKey;
+    	}
+    	
     	Enumeration<String> aliases = keyStore.aliases();
     	String alias = aliases.hasMoreElements() ? aliases.nextElement() : null;
 		if (alias == null) {
@@ -159,22 +149,44 @@ public class TokenService {
             String alias = aliases.nextElement();
             X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             if (cert != null) {
-                CertificateInfo info = new CertificateInfo();
-                info.setAlias(alias);
-                info.setSubjectDN(cert.getSubjectX500Principal().getName());
-                info.setIssuerDN(cert.getIssuerX500Principal().getName());
-                info.setValidFrom(cert.getNotBefore());
-                info.setValidTo(cert.getNotAfter());
-                info.setPublicKey(cert.getPublicKey());                
-                info.parseSubjectDN();
-                info.parseIssuerDN();                
-                
+                CertificateInfo info = new CertificateInfo(alias, cert);                
                 certificateInfoList.add(info);
             }
         }
 
         return certificateInfoList;
-    }  
+    }
+    
+    public String getCertificateAlias() throws Exception {
+        Enumeration<String> aliases = keyStore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (keyStore.isKeyEntry(alias)) {
+                return alias;  // First alias that has a private key
+            }
+        }
+        throw new Exception("No alias with a private key found.");
+    }
+    
+    public X509Certificate getCertificate() throws Exception {
+        if (keyStore == null) {
+            throw new IllegalStateException("KeyStore is not initialized. Call detectToken() first.");
+        }
+
+        Enumeration<String> aliases = keyStore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (keyStore.isKeyEntry(alias)) {
+                java.security.cert.Certificate cert = keyStore.getCertificate(alias);
+                if (cert instanceof X509Certificate) {
+                    return (X509Certificate) cert;
+                }
+            }
+        }
+
+        throw new Exception("No valid X.509 certificate found in the token.");
+    }
+    
     
     public void cleanup() {
         try {
@@ -183,7 +195,7 @@ public class TokenService {
             	
                 Security.removeProvider(pkcs11Provider.getName());
                 //Logout from the token
-                JnaPkcs11Logout.logoutToken(epassConfig.get("library").toString());
+                JnaPkcs11.logoutToken(epassConfig.get("library").toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -197,6 +209,4 @@ public class TokenService {
             Config.PIN = null; // Clear PIN from config too            
         }
     }
-    
-    
 }

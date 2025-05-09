@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Digital Signature App</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" th:href="@{/css/bootstrap.css}"/>
@@ -11,40 +12,53 @@
 <body>
     <div class="container my-5">
         <h3 class="text-center mb-4">Digital Signature Demo Page</h3>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        <section class="row row-cols-1 row-cols-md-3 g-4">
             <!-- Card 1 -->
-            <div class="col">
+            <article class="col">
                 <div class="card h-100 text-center">
                     <div class="card-body">
                         <h5 class="card-title">Sign PDF</h5>
                         <p class="card-text">Digitally sign your PDF documents securely.</p>
-                        <a href="/esignPDF" class="btn btn-primary">Click Here</a>
+                        <a href="/esignPDF" class="btn btn-primary" aria-label="Sign PDF">Click Here</a>
                     </div>
                 </div>
-            </div>
+            </article>
             <!-- Card 2 -->
-            <div class="col">
+            <article class="col">
                 <div class="card h-100 text-center">
                     <div class="card-body">
-                        <h5 class="card-title">Sign JSON {}</h5>
+                        <h5 class="card-title">Sign JSON</h5>
                         <p class="card-text">Apply digital signatures to your JSON data.</p>
-                        <a href="#" class="btn btn-primary">Click Here</a>
+						<a href="/esignJSON" class="btn btn-primary" aria-label="Sign JSON">Click Here</a>
                     </div>
                 </div>
-            </div>
+            </article>
             <!-- Card 3 -->
-            <div class="col">
+            <article class="col">
                 <div class="card h-100 text-center">
                     <div class="card-body">
                         <h5 class="card-title">Sign XML</h5>
                         <p class="card-text">Secure your XML files with digital signatures.</p>
-                        <a href="#" class="btn btn-primary">Click Here</a>
+                        <button class="btn btn-primary" aria-label="Sign XML" onclick="signXml()">Click Here</button>
                     </div>
                 </div>
-            </div>
-        </div>
+            </article>
+        </section>
     </div>
+
     <!-- Bootstrap Bundle JS -->
     <script th:src="@{/js/bootstrap.bundle.js}" defer></script>
+    <script>
+        function signJson() {
+            alert("JSON signing process initiated!");
+            // Add JSON signing logic here
+        }
+
+        function signXml() {
+            alert("XML signing process initiated!");
+            // Add XML signing logic here
+        }
+    </script>
 </body>
 </html>

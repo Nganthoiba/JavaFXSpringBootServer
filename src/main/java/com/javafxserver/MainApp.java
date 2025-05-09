@@ -12,17 +12,12 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class MainApp extends Application{
-		
+	String applicationCssString;
 	@Override
     public void init() {
 		//Config.createAppPath();
-    }
-	
-	private void loadCss(Scene scene) {
-		String css = getClass().getResource("/styles/application.css").toExternalForm();
-		scene.getStylesheets().add(css);
-	}
-	
+		applicationCssString = getClass().getResource("/styles/application.css").toExternalForm();
+    }	
 
     @Override
     public void start(Stage primaryStage) {
@@ -31,7 +26,7 @@ public class MainApp extends Application{
 	        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/javafxserver/fxml/MainView.fxml"));
 	        Parent root = loader.load();	
 	        Scene scene = new Scene(root);
-	        this.loadCss(scene);
+	        scene.getStylesheets().add(applicationCssString);
 	        
 	        // Get the controller instance
 	        MainViewController controller = loader.getController();

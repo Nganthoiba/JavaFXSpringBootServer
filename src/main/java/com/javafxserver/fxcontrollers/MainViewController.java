@@ -2,19 +2,21 @@ package com.javafxserver.fxcontrollers;
 
 import java.io.File;
 import com.javafxserver.config.Config;
+import com.javafxserver.digitalsigner.TokenManager;
 import com.javafxserver.exceptions.HandleExceptionMessage;
 import com.javafxserver.service.ServerServiceHandler;
 import com.javafxserver.utils.LogWriter;
 import com.javafxserver.utils.UIUtils;
 
 import javafx.application.HostServices;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
+import com.javafxserver.service.TokenMonitorService;
 public class MainViewController {	
 
     @FXML private TextField epassDriverFilePath;
@@ -28,6 +30,7 @@ public class MainViewController {
     private File selectedDriverFile;
     private HostServices hostServices;
     private Task<Void> serverStartTask;
+    private TokenMonitorService tokenMonitorService;
     
 
     @FXML
@@ -119,6 +122,21 @@ public class MainViewController {
         }); 
     	
     	new Thread(serverStartTask).start();
+    	
+    	/**
+		 * Start monitoring the token for events like removal or PIN change.
+		 * This will help in handling token-related events gracefully.
+		 */
+        
+        tokenMonitorService = new TokenMonitorService(TokenManager.tokenService.getPkcs11Provider());
+        tokenMonitorService.startMonitoring((title, message) -> {
+            Platform.runLater(() -> {
+                log(title + ": " + message);
+                //stopServer(null);
+                UIUtils.showAlert(title, message);
+            });
+        });
+        
     }   
     
 
@@ -131,6 +149,10 @@ public class MainViewController {
             ServerServiceHandler.stop();
             switchServerButtons(false);
             log("Server stopped.");
+            if (tokenMonitorService != null) {
+                tokenMonitorService.stopMonitoring();
+            }
+            Config.PIN = null;
         } catch (Exception e) {
             UIUtils.showErrorAlert("Error", e.getMessage());
             log("An error has occurred: " + e.getMessage());

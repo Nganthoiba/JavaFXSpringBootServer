@@ -22,16 +22,16 @@ public class PinPrompt {
 	    final String[] pin = {""};
 	    final boolean[] isValid = {false};
 	    final boolean[] isCancelled = {false};
-	    final int[] attempts = {0};
+//	    final int[] attempts = {0};
 	
-	    while (attempts[0] < MAX_RETRIES) {
+//	    while (attempts[0] < MAX_RETRIES) {
 	        final Object lock = new Object();
 	        
 	        Platform.runLater(() -> {
-	        	int remainingAttempts = MAX_RETRIES - attempts[0];
+//	        	int remainingAttempts = MAX_RETRIES - attempts[0];
 	            PasswordDialog dialog = new PasswordDialog();
 	            dialog.setTitle("Enter secret PIN:");
-	            dialog.setHeaderText("You have " + remainingAttempts + " attempt(s) remaining.");
+//	            dialog.setHeaderText("You have " + remainingAttempts + " attempt(s) remaining.");
 	            Optional<String> result = dialog.showAndWait();
 	
 	            synchronized (lock) {
@@ -50,7 +50,10 @@ public class PinPrompt {
 	                        pin[0] = input;
 	                        isValid[0] = true;
 	                    } else {
-	                        UIUtils.showAlert("Invalid PIN", "Invalid PIN entered.\nYou have " + (MAX_RETRIES - (attempts[0] + 1))+" attempt(s) left");
+//	                        UIUtils.showAlert("Invalid PIN", 
+//	                        		"Invalid PIN entered.\nYou have " + (MAX_RETRIES - (attempts[0] + 1))+" attempt(s) left");
+	                    	UIUtils.showAlert("Invalid PIN", 
+	                        		"Invalid PIN entered.");
 	                        //System.out.println("");
 	                        LogWriter.writeLog("Invalid PIN entered.");
 	                    }
@@ -80,8 +83,8 @@ public class PinPrompt {
 	        if(isCancelled[0]) {
 	        	throw new RuntimeException("PIN entry cancelled by user.");
 	        }
-	        attempts[0]++;
-	    }
+//	        attempts[0]++;
+//	    }
 	    // 🛠 FIX: Show alert on JavaFX thread
 	    Platform.runLater(() -> UIUtils.showAlert("Access Denied", "Maximum PIN attempts exceeded. Please restart the process."));
 	    throw new RuntimeException("Maximum PIN attempts exceeded");

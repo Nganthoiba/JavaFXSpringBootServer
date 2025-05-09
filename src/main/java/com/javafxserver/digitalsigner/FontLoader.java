@@ -23,4 +23,12 @@ public class FontLoader {
 
         return tempFile.toFile();
     }
+    
+    public static boolean isFontAvailable(String fontName) {
+        ClassPathResource resource = new ClassPathResource("fonts/" + fontName);
+        String pathString = resource.getPath();
+        System.out.println("Font path: " + pathString);
+        return resource.exists();
+    }
+    
 }
