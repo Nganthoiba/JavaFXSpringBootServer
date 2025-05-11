@@ -1,8 +1,10 @@
 package com.javafxserver.digitalsigner;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
@@ -37,6 +39,22 @@ public class TimeStampDataConvertor {
     	CMSSignedData timestampedData = CMSSignedData.replaceSigners(signedData, newSignerStore);
     	return timestampedData;
     }
+	
+	public static CMSSignedData addTimestampToSignature(CMSSignedData signedData, TimeStampToken tsToken) throws Exception {
+	    SignerInformation signer = signedData.getSignerInfos().getSigners().iterator().next();
+	    
+	    // Create unsigned attributes with timestamp token
+	    AttributeTable unsignedAttributes = new AttributeTable(new DERSet(new Attribute(
+	            PKCSObjectIdentifiers.id_aa_signatureTimeStampToken,
+	            new DERSet(new DEROctetString(tsToken.getEncoded())) 
+	    )));
+
+	    // Replace unsigned attributes in signer information
+	    SignerInformation tsSigner = SignerInformation.replaceUnsignedAttributes(signer, unsignedAttributes);
+	    
+	    return CMSSignedData.replaceSigners(signedData, new SignerInformationStore(Collections.singletonList(tsSigner)));
+	}
+
 }
 
 /*

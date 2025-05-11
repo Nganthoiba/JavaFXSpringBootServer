@@ -2,10 +2,16 @@ package com.javafxserver.digitalsigner;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.tsp.*;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 public class TSAClient {
 	private final static String TSA_URL = "http://timestamp.digicert.com";
 	//http://sha256timestamp.ws.symantec.com/sha256/timestamp
@@ -15,8 +21,10 @@ public class TSAClient {
 	//http://timestamp.sectigo.com
 	//http://tsa.startssl.com/rfc3161
 	//http://tsa.safecreative.org
+	//http://ca.signfiles.com/TSAServer.aspx
 	
-	public static TimeStampToken getTimeStampToken(byte[] dataToSign) throws Exception {
+	public static TimeStampToken getTimeStampToken(byte[] dataToSign) 
+			throws MalformedURLException, IOException, NoSuchAlgorithmException, TSPException, URISyntaxException{
         // Create a digest of the data
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] hash = digest.digest(dataToSign);
@@ -32,14 +40,12 @@ public class TSAClient {
 
         // Send the request to the TSA server
         byte[] requestBytes = request.getEncoded();
-        //HttpURLConnection connection = (HttpURLConnection) new URL(TSA_URL).openConnection();
         
-
-        HttpURLConnection connection = (HttpURLConnection) URI.create(TSA_URL).toURL().openConnection();
-
+        HttpURLConnection connection = (HttpURLConnection) new URI(TSA_URL).toURL().openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/timestamp-query");
+        connection.setRequestProperty("Accept", "application/timestamp-reply");
         connection.setRequestProperty("Content-Length", String.valueOf(requestBytes.length));
         connection.setRequestProperty("User-Agent", "Java TSA Client");
         connection.setConnectTimeout(60000); //60 seconds

@@ -13,4 +13,10 @@ public class SignatureDetail {
 	
 	//The page number at which the signature will appear
 	public int pageNumber = 1; //by default
+	
+	//Signer name
+	public String signerName = "";
+	
+	//Signer email
+	public String signerEmail = "";
 }

@@ -1,6 +1,8 @@
 package com.javafxserver.exceptions;
 
-public class NoCertificateFoundException extends Exception {
+import java.io.IOException;
+
+public class NoCertificateFoundException extends IOException {
 	private static final long serialVersionUID = 1L;
 	public NoCertificateFoundException(String message) {
 		super(message);

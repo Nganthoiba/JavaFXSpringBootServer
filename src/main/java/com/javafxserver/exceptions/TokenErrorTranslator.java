@@ -14,7 +14,7 @@ public class TokenErrorTranslator {
     public static DigiSignError getFriendlyMessage(Exception ex) {
         String title = "Token Error";
         String message = "An unexpected error occurred while accessing the USB token.";
-        String techDetails = null;
+        String techDetails = ex.getMessage();
 
         // Handle known exception types
         if (ex instanceof java.security.ProviderException) {
@@ -22,7 +22,7 @@ public class TokenErrorTranslator {
             message = "The USB token may have been removed or is not responding. Please reinsert it and try again.";
         } else if (ex instanceof IOException) {
             title = "Access Problem";
-            message = "There was a problem accessing the USB token. Please make sure it is properly inserted.";
+            message = "There was a problem accessing the USB token. Please make sure it is properly inserted. "+techDetails;
         } else if (ex instanceof KeyStoreException) {
             title = "Initialization Failed";
             message = "The token could not be initialized. Try reinserting it or restarting the application.";
@@ -34,7 +34,7 @@ public class TokenErrorTranslator {
             message = "The system couldn't verify the token. Please ensure it is connected and try again.";
         }
         else {        				// Handle other exceptions
-			techDetails = ex.getMessage();
+			
 			if (techDetails == null) {
 				techDetails = "No additional information available.";
 			}
