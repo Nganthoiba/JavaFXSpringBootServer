@@ -2,6 +2,7 @@ package com.javafxserver.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -17,6 +18,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+
+import javax.naming.InvalidNameException;
+
 import com.javafxserver.config.Config;
 import com.javafxserver.exceptions.EpassTokenDetectionException;
 import com.javafxserver.exceptions.InvalidPinException;
@@ -141,7 +145,7 @@ public class TokenService {
     }
     
     //Method to get certificate details together
-    public List<CertificateInfo> getCertificateDetails() throws Exception {
+    public List<CertificateInfo> getCertificateDetails() throws KeyStoreException, InvalidNameException, UnsupportedEncodingException{
         List<CertificateInfo> certificateInfoList = new ArrayList<>();
 
         Enumeration<String> aliases = keyStore.aliases();

@@ -1,5 +1,6 @@
 package com.javafxserver.digitalsigner;
 
+import java.io.UnsupportedEncodingException;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
@@ -7,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 
@@ -78,7 +80,7 @@ public class CertificateInfo {
     	
     }
     
-    public CertificateInfo(String alias, X509Certificate cert) throws Exception {
+    public CertificateInfo(String alias, X509Certificate cert) throws InvalidNameException, UnsupportedEncodingException{
     	
     	this.alias = alias;
     	this.subjectDN = cert.getSubjectX500Principal().getName();
@@ -155,7 +157,7 @@ public class CertificateInfo {
 		this.validTo = valid_to;
 	}
 	
-	private Map<String, String> getAttributes(String dn) throws Exception {
+	private Map<String, String> getAttributes(String dn) throws InvalidNameException, UnsupportedEncodingException{
 		LdapName ldapName = new LdapName(dn);
 		Map<String, String> attributes = new HashMap<>();
 
@@ -187,11 +189,11 @@ public class CertificateInfo {
 	}
 	
 	
-	public void parseSubjectDN() throws Exception {
+	public void parseSubjectDN() throws InvalidNameException, UnsupportedEncodingException{
 		subjectAttributes = getAttributes(this.subjectDN);
     }
 	
-	public void parseIssuerDN() throws Exception {
+	public void parseIssuerDN() throws InvalidNameException, UnsupportedEncodingException{
 		issuerAttributes = getAttributes(this.issuerDN);
 	}
 	

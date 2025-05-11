@@ -157,6 +157,9 @@ public class MainViewController {
             UIUtils.showErrorAlert("Error", e.getMessage());
             log("An error has occurred: " + e.getMessage());
         }
+    	finally {
+			TokenManager.logoutToken();
+		}
     }
     
     @FXML

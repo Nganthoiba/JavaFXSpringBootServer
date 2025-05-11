@@ -31,6 +31,7 @@ import com.javafxserver.digitalsigner.TokenManager;
 import com.javafxserver.exceptions.EmptyPinException;
 import com.javafxserver.exceptions.HandleExceptionMessage;
 import com.javafxserver.exceptions.TokenErrorTranslator;
+import com.javafxserver.exceptions.TokenInitializationFailedException;
 
 
 @RestController
@@ -225,11 +226,10 @@ public class AppController {
      * @throws Exception
      */
     private void initializeTokenIfNeeded() throws Exception{
-    	/*
+    	
     	if(!TokenManager.isTokenPresent()) {
     		throw new TokenInitializationFailedException("Token is not inserted or not detected, make sure that the usb token is inserted properly");
-    	}
-    	*/
+    	}    	
     	
     	if(!TokenManager.isUSBTokenInitialized()) {
         	if(Config.PIN != null && TokenManager.tokenError != null) {
