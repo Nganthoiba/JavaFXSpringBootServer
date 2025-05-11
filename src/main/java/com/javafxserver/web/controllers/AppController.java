@@ -3,7 +3,6 @@ package com.javafxserver.web.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.security.CodeSigner;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;

@@ -10,7 +10,6 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.color.PDColor;
 import org.apache.pdfbox.pdmodel.graphics.color.PDDeviceRGB;
 import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
-import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAnnotationWidget;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceDictionary;
 import org.apache.pdfbox.pdmodel.interactive.annotation.PDAppearanceStream;
@@ -19,13 +18,8 @@ import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureOptions;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 import org.apache.pdfbox.pdmodel.interactive.form.PDSignatureField;
-import org.apache.pdfbox.util.Matrix;
-
 import com.javafxserver.service.TokenService;
 import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.cos.COSName;
-
-import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,9 +33,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
-public class PDFSigner {
+public class PDFSigner {	
 	
-	private static PDType0Font cachedFont = null;
 	private static final int SIGNATURE_FONT_SIZE = 9;
 	private static final int PREFERRED_SIGNATURE_SIZE = 16384; // 16KB
 

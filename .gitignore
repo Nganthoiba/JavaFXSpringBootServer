@@ -1,2 +1,57 @@
-/logs/
+# Maven target directory
 /target/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*.orig
+
+# IntelliJ IDEA
+/.idea/
+*.iml
+*.iws
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# NetBeans
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Linux
+*~
+
+# Cache & generated files
+/cache/
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional: keep empty directories
+logs/.gitignore
+tmp/.gitignore
