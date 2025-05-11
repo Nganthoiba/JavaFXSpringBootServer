@@ -9,8 +9,6 @@ import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.interactive.annotation.*;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.*;
 import org.apache.pdfbox.pdmodel.interactive.form.*;
-import org.apache.pdfbox.util.Matrix;
-
 import com.javafxserver.service.TokenService;
 
 import java.awt.Color;
