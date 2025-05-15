@@ -4,15 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.javafxserver.config.Config;
@@ -27,6 +29,7 @@ import com.javafxserver.digitalsigner.PDFSigner;
 import com.javafxserver.digitalsigner.Rectangle;
 import com.javafxserver.digitalsigner.SignatureDetail;
 import com.javafxserver.digitalsigner.TokenManager;
+import com.javafxserver.digitalsigner.XMLSigner;
 import com.javafxserver.exceptions.EmptyPinException;
 import com.javafxserver.exceptions.HandleExceptionMessage;
 import com.javafxserver.exceptions.TokenErrorTranslator;
@@ -207,18 +210,73 @@ public class AppController {
     	}
     }
     
-    
-    @GetMapping("/api/test")    
-    public Map<String, String> testApi() {
-    	Map<String, String> responseMap = new HashMap<>();
-    	responseMap.put("message", "Hello, World!");
-        return responseMap;
+    @PostMapping("/api/esignXMLfile")
+    public ResponseEntity<?> signXmlAndDownload(@RequestParam("xml_file") MultipartFile multipartFile) throws Exception {
+    	byte[] signedXMLBytes = null;
+    	File tempXMLFile = null;
+		try {
+			if (multipartFile.isEmpty()) {
+				throw new IllegalArgumentException("No file is uploaded");
+			}
+			initializeTokenIfNeeded(); 
+			tempXMLFile = ConvertFile.toFile(multipartFile);
+			
+			signedXMLBytes = XMLSigner.signXML(tempXMLFile, TokenManager.tokenService);
+			
+			// Return response with download headers
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+	        headers.setContentDisposition(ContentDisposition.attachment().filename("signed_output.xml").build());
+	        headers.setContentLength(signedXMLBytes.length);
+
+	        return new ResponseEntity<>(signedXMLBytes, headers, HttpStatus.OK);
+			
+		} catch (IllegalArgumentException | 
+				IndexOutOfBoundsException | 
+				IOException | 
+				URISyntaxException e) {
+			return buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+
+		} catch (Exception e) {
+			return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+		} finally {
+			if (tempXMLFile != null && tempXMLFile.exists()) {
+				tempXMLFile.delete();
+			}
+		}
+        
     }
     
-    @PostMapping("/api/test")
-    public ResponseEntity<String> testApi(@RequestBody String jsonData) {
-    	return ResponseEntity.ok(jsonData);
+    
+    @PostMapping("/api/esignXMLdata")
+    public ResponseEntity<?> signXmlAndDownload(@RequestBody String xmlData) {
+        try {
+            if (xmlData == null || xmlData.trim().isEmpty()) {
+                throw new IllegalArgumentException("No XML data is provided");
+            }
+
+            initializeTokenIfNeeded();
+            
+            byte[] signedXMLByteData = XMLSigner.signXML(xmlData, TokenManager.tokenService);
+
+            // Option 1: Return as Base64 (safer for transport)
+            String signedXMLBase64 = Base64.getEncoder().encodeToString(signedXMLByteData);
+
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("message", "XML data signed successfully.");
+            responseMap.put("signedXMLBase64", signedXMLBase64);
+            TokenManager.logoutToken();
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(responseMap);
+
+        } catch (IllegalArgumentException e) {
+            return buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+    
     
     /**
      * This method will initialize token only if it is necessary
@@ -261,6 +319,7 @@ public class AppController {
         Map<String, Object> errorBody = new HashMap<>();
         errorBody.put("message", error.getTitle() + ": " + error.getMessage());
         //errorBody.put("message", HandleExceptionMessage.getMessage(e));
+        errorBody.put("techDetails", error.getCausedBy());
         errorBody.put("status", status.value());
         return ResponseEntity.status(status)
                 .contentType(MediaType.APPLICATION_JSON)

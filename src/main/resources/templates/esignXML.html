@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Digitally Sign XML</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+	<link rel="stylesheet" th:href="@{/css/custom.css}" />
+	<!-- Prism CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+</head>
+
+<body>
+	<div class="container my-5">
+		<a href="/" class="btn btn-secondary mb-3">Back to Home</a>
+		<h3 class="text-center">Digitally Sign XML</h3>
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="mb-3">
+					<label for="xmlContent" class="form-label">Enter XML Content:</label>
+					<textarea id="xmlContent" class="form-control" rows="15"
+						placeholder="Enter valid XML content here..."></textarea>
+				</div>
+
+				<div class="d-flex gap-3">
+					<button id="signButton" class="btn btn-primary">Sign XML</button>
+					<!-- Button trigger modal for showing developer's guide line for implementation of digitally signing XML content -->
+					<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#devsGuideModal">
+						Show Devs Guide
+					</button>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<label for="outputField" class="form-label">Signed XML Output:</label>
+				<textarea id="outputField" class="form-control" rows="15" readonly></textarea>
+			</div>
+		</div>
+	</div>
+	<!-- Modal for developer's guide, on how to implement -->
+	<div class="modal fade" id="devsGuideModal" tabindex="-1" aria-labelledby="devsGuideModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="devsGuideModalLabel">Developer's Guide</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<p>To implement the digital signing of XML content, follow these steps:</p>
+					<ol>
+						<li>Ensure you have a valid XML content to sign.</li>
+						<li>Use the provided API endpoint <code>http://localhost:8090/api/esignXMLdata</code> or
+							<code>https://localhost:8443/api/esignXMLdata</code> to send the XML content.
+						</li>
+						<li>The API will return the signed XML content in base64 format.</li>
+						<li>Decode the base64 response to get the signed XML.</li>
+					</ol>
+					<div>
+						<label for="#">Source Code:</label>
+						<h6>HTML section</h6>
+						<pre><code class="language-markup">
+&lt;div class="container"&gt;
+	&lt;h3 class="text-center"&gt;Digitally Sign XML&lt;/h3&gt;
+	&lt;div class="row"&gt;
+		&lt;div class="col-sm-6"&gt;
+			&lt;div class="mb-3"&gt;
+				&lt;label for="xmlContent" class="form-label"&gt;Enter XML Content:&lt;/label&gt;
+				&lt;textarea id="xmlContent" 
+					class="form-control" rows="15"
+					placeholder="Enter valid XML content here..."&gt;&lt;/textarea&gt;
+			&lt;/div&gt;
+
+			&lt;div class="d-flex gap-3"&gt;
+				&lt;button id="signButton" 
+					class="btn btn-primary"&gt;Sign XML&lt;/button&gt;
+			&lt;/div&gt;
+		&lt;/div&gt;
+		&lt;div class="col-sm-6"&gt;
+			&lt;label for="outputField" 
+				class="form-label"&gt;Signed XML Output:&lt;/label&gt;
+			&lt;textarea id="outputField" 
+				class="form-control" rows="15" readonly&gt;&lt;/textarea&gt;
+		&lt;/div&gt;
+	&lt;/div&gt;
+&lt;/div&gt;
+							</code>
+						</pre>
+
+						<h6>Javascript Section</h6>
+						<pre>
+							<code class="language-javascript">
+var outputField = document.getElementById("outputField");
+async function signXML() {
+	const xmlData = document.getElementById("xmlContent").value.trim();
+	if (!xmlData) {
+		alert("Please enter XML content.");
+		return;
+	}
+
+	try {
+		const signXMLUrl = "http://localhost:8090/api/esignXMLdata";
+		//Or you can replace with https://localhost:8443/api/esignXMLdata
+		try {
+			outputField.innerHTML = "Wait please ...";
+			const response = await fetch(signXMLUrl, {
+				method: "POST",
+				body: xmlData,
+				headers: {
+					'Content-Type': 'text/plain'
+				}
+			});
+			const responseData = await response.json();
+			if (!response.ok) {
+				throw new Error(responseData.message || "An error occurred");
+			}
+
+			alert(responseData.message);
+			// Decode base64 to UTF-8 string
+			const xmlString = atob(responseData.signedXMLBase64);
+			outputField.innerHTML = xmlString;
+
+		} catch (error) {
+			console.error("Error in client-side request:", error);
+			outputField.innerHTML = error.message;
+			alert(error.message);
+		}
+	} catch (error) {
+		alert("Invalid JSON format. Please correct and try again.");
+	}
+}
+document.getElementById("signButton").addEventListener("click", signXML);
+							</code>
+						</pre>
+
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Bootstrap Bundle JS -->
+	<script th:src="@{/js/bootstrap.bundle.js}"></script>
+	<script>
+		var outputField = document.getElementById("outputField");
+		async function signXML() {
+			const xmlData = document.getElementById("xmlContent").value.trim();
+			if (!xmlData) {
+				alert("Please enter XML content.");
+				return;
+			}
+
+			try {
+				const signXMLUrl = "http://localhost:8090/api/esignXMLdata";
+				//Or you can replace with https://localhost:8443/api/esignXMLdata
+				try {
+					outputField.innerHTML = "Wait please ...";
+					const response = await fetch(signXMLUrl, {
+						method: "POST",
+						body: xmlData,
+						headers: {
+							'Content-Type': 'text/plain'
+						}
+					});
+					const responseData = await response.json();
+					if (!response.ok) {
+						throw new Error(responseData.message || "An error occurred");
+					}
+
+					alert(responseData.message);
+					// Decode base64 to UTF-8 string
+					const xmlString = atob(responseData.signedXMLBase64);
+					outputField.innerHTML = xmlString;
+
+
+				} catch (error) {
+					console.error("Error in client-side request:", error);
+					outputField.innerHTML = error.message;
+					alert(error.message);
+				}
+			} catch (error) {
+				alert("Invalid JSON format. Please correct and try again.");
+			}
+		}
+		document.getElementById("signButton").addEventListener("click", signXML);
+	</script>
+	<!-- Prism JS -->
+	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+</body>
+
+</html>

@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 import com.javafxserver.service.TokenService;
 import com.javafxserver.ui.DigiSignError;
 
 import com.javafxserver.config.Config;
+import com.javafxserver.exceptions.EpassTokenDetectionException;
+import com.javafxserver.exceptions.InvalidPinException;
 import com.javafxserver.exceptions.TokenErrorTranslator;
 
 public class TokenManager {
@@ -20,7 +23,7 @@ public class TokenManager {
 	
 	
 	public static void initializeToken(String secretPin) 
-			throws Exception {
+			throws IOException, UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, EpassTokenDetectionException, InvalidPinException {
 		/**
 		 * It is important to validate for the PKCS#11 library file 
 		 */
@@ -67,42 +70,7 @@ public class TokenManager {
                 return false;
             }
 
-        } 
-		/*
-		catch (java.security.ProviderException ex) {
-        	tokenError = new DigiSignError("Token Removed", 
-                    "The ePass2003 token device may have been removed or is not responding. Please insert properly.");
-        	ex.printStackTrace();
-        	return false;
-        } 
-		catch(IOException ioException) {
-			tokenError = new DigiSignError("USB Token Unaccessible", 
-					"There was a problem accessing the USB token. Please check if it's properly inserted.");
-			ioException.printStackTrace();
-        	tokenService.cleanup();
-        	Config.PIN = null;
-			return false;
-		}
-		catch(KeyStoreException keyStoreException) {
-			tokenError = new DigiSignError("Token Access Error", 
-			        "The token could not be initialized. Try reinserting it and restarting the application.");
-		    keyStoreException.printStackTrace();
-		    return false;
-		}
-		catch(CertificateException certificateException) {
-			tokenError = new DigiSignError("Certificate Issue", 
-			        "The token doesn't seem to contain a valid certificate. Contact support if the issue persists.");
-		    certificateException.printStackTrace();
-			return false;
-		}
-		catch(NoSuchAlgorithmException noSuchAlgorithmException) {
-			tokenError = new DigiSignError("Token Verification Failed", 
-			        "We couldn’t verify the token. Please check the connection or reinsert the token.");
-		    noSuchAlgorithmException.printStackTrace();
-		    return false;
-		}
-		*/
-		
+        }
 		catch (Exception ex) {
 			tokenError = TokenErrorTranslator.getFriendlyMessage(ex);
         	//ex.printStackTrace();

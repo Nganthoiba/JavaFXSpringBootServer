@@ -16,7 +16,14 @@ public class MainApp extends Application{
 	@Override
     public void init() {
 		//Config.createAppPath();
-		applicationCssString = getClass().getResource("/styles/application.css").toExternalForm();
+		try {
+			applicationCssString = getClass().getResource("/styles/application.css").toExternalForm();
+			System.out.println("CSS file loaded: " + applicationCssString);
+		} catch (Exception e) {
+			System.out.println("Error loading CSS file: " + e.getMessage());
+			e.printStackTrace();
+		}
+		
     }	
 
     @Override
@@ -26,6 +33,9 @@ public class MainApp extends Application{
 	        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/javafxserver/fxml/MainView.fxml"));
 	        Parent root = loader.load();	
 	        Scene scene = new Scene(root);
+	        if(applicationCssString != null) {
+	        	applicationCssString = getClass().getResource("/styles/application.css").toExternalForm();
+	        }
 	        scene.getStylesheets().add(applicationCssString);
 	        
 	        // Get the controller instance

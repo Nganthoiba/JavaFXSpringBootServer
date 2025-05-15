@@ -17,7 +17,7 @@
             <TextArea fx:id="consoleTextArea" layoutX="136.0" layoutY="115.0" prefHeight="181.0" prefWidth="432.0" />
             <Button id="stopServerBtn" fx:id="stopServerButton" disable="true" layoutX="236.0" layoutY="82.0" mnemonicParsing="false" onAction="#stopServer" styleClass="pointer-button" stylesheets="@../../../styles/application.css" text="Stop Server" />
             <TextField fx:id="epassDriverFilePath" layoutX="136.0" layoutY="43.0" prefHeight="25.0" prefWidth="329.0" promptText="Select the correct epass token driver PKCS#11 DLL file..." />
-            <Button id="launchDemoBtn" fx:id="launchDemoButton" disable="true" layoutX="406.0" layoutY="82.0" mnemonicParsing="false" onAction="#openDemoInBrowser" styleClass="pointer-button" stylesheets="@../../../styles/application.css" text="Launch Demo" />
+            <Button id="launchDemoBtn" fx:id="launchDemoButton" disable="true" layoutX="406.0" layoutY="82.0" mnemonicParsing="false" onAction="#openDemoInBrowser" styleClass="pointer-button" stylesheets="@../../../styles/application.css" text="Go To Sign" />
             <Button id="settingBtn" fx:id="settingsButton" layoutX="509.0" layoutY="82.0" mnemonicParsing="false" styleClass="pointer-button" stylesheets="@../../../styles/application.css" text="Settings" />
          </children>
       </AnchorPane>

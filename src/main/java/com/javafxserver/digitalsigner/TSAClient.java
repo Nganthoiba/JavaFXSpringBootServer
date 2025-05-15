@@ -13,7 +13,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 public class TSAClient {
-	private final static String TSA_URL = "http://timestamp.digicert.com";
+	private final static String TSA_URL = "http://ca.signfiles.com/TSAServer.aspx";
 	//http://sha256timestamp.ws.symantec.com/sha256/timestamp
 	//http://timestamp.comodoca.com/rfc3161
 	//http://timestamp.globalsign.com/scripts/timstamp.dll

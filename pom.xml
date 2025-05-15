@@ -158,20 +158,12 @@
     	<resources>
 	        <resource>
 	            <directory>src/main/resources</directory>
+	            <includes>
+					<include>**/*</include>
+				</includes>
 	        </resource>
 	    </resources>
         <plugins>
-            <!-- JavaFX Maven Plugin 
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
-                <configuration>
-                    <mainClass>com.javafxserver.MainApp</mainClass>
-                </configuration>
-            </plugin>
-            -->
-            
             <plugin>
 			    <groupId>org.apache.maven.plugins</groupId>
 			    <artifactId>maven-shade-plugin</artifactId>

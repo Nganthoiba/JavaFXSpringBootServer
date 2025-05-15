@@ -40,7 +40,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Sign XML</h5>
                         <p class="card-text">Secure your XML files with digital signatures.</p>
-                        <button class="btn btn-primary" aria-label="Sign XML" onclick="signXml()">Click Here</button>
+						<a href="/esignXML" class="btn btn-primary" aria-label="Sign XML">Click Here</a>
                     </div>
                 </div>
             </article>
@@ -48,17 +48,6 @@
     </div>
 
     <!-- Bootstrap Bundle JS -->
-    <script th:src="@{/js/bootstrap.bundle.js}" defer></script>
-    <script>
-        function signJson() {
-            alert("JSON signing process initiated!");
-            // Add JSON signing logic here
-        }
-
-        function signXml() {
-            alert("XML signing process initiated!");
-            // Add XML signing logic here
-        }
-    </script>
+    <script th:src="@{/js/bootstrap.bundle.js}" defer></script>    
 </body>
 </html>

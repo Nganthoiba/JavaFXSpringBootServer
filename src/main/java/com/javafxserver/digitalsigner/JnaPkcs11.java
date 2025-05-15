@@ -116,10 +116,10 @@ public class JnaPkcs11 {
 
             long slotCount = slotCountRef.getValue().longValue();
             if (slotCount > 0) {
-                System.out.println("Token is inserted.");
+                //System.out.println("Token is inserted.");
                 return true;
             } else {
-                System.out.println("Token is NOT inserted.");
+                //System.out.println("Token is NOT inserted.");
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -22,8 +22,8 @@ public class Config {
     public static final String STORAGE_PATH = APP_PATH + File.separator + "storage";
     public static final String PUBLIC_PATH = System.getProperty("user.dir") + File.separator + "public";
 
-    public static final int DEFAULT_HTTP_PORT = 8080;
-    public static final int DEFAULT_HTTPS_PORT = 8081;
+    public static final int DEFAULT_HTTP_PORT = 8090;
+    public static final int DEFAULT_HTTPS_PORT = 8443;
     public static String PIN = null; // This will be set when the user enters the correct PIN
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -150,7 +150,6 @@ public class Config {
             writer.write("slotListIndex = " + epassConfig.getOrDefault("slotListIndex", 0) + "\n");
             writer.write("attributes = " + epassConfig.getOrDefault("attributes", "compatibility") + "\n");
         }
-
         return tempFile;
     }
 

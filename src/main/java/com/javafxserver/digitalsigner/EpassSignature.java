@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -55,14 +56,21 @@ public class EpassSignature implements SignatureInterface {
             CMSProcessableByteArray cmsData = new CMSProcessableByteArray(contentBytes);
             Enumeration<String> aliases = tokenDetails.getKeyStore().aliases();
 
-            String alias = aliases.hasMoreElements() ? aliases.nextElement() : null;
+            String alias = null;
+            while (aliases.hasMoreElements()) {
+                String candidate = aliases.nextElement();
+                if (tokenDetails.getKeyStore().isKeyEntry(candidate)) {
+                    alias = candidate;
+                    break;
+                }
+            }
             if (alias == null) {
-                throw new NoCertificateFoundException("No certificates found in token.", 
+                throw new NoCertificateFoundException("No private key entry found in the token.", 
                 		new IOException("The KeyStore has no alias"));
             }
 
             PrivateKey privateKey = (PrivateKey) tokenDetails.getKeyStore().getKey(alias, pin.toCharArray());
-            X509Certificate cert = (X509Certificate) tokenDetails.getKeyStore().getCertificate(alias);
+            X509Certificate userCert = (X509Certificate) tokenDetails.getKeyStore().getCertificate(alias);
 
             Certificate[] certChain = tokenDetails.getKeyStore().getCertificateChain(alias);
             if (certChain == null || certChain.length == 0) {
@@ -71,24 +79,27 @@ public class EpassSignature implements SignatureInterface {
             
             // The last certificate in the chain should be the root CA.
             // Check if the last certificate is self-signed:
-            X509Certificate rootCert = (X509Certificate) certChain[certChain.length - 1];
+            X509Certificate lastCert = (X509Certificate) certChain[certChain.length - 1];//user certificate
             
-            String subjectDN = rootCert.getSubjectX500Principal().getName();        	
-        	String issuerDN = rootCert.getIssuerX500Principal().getName();
-            List<Certificate> fullChain = new ArrayList<>(Arrays.asList(certChain));
-            if (!issuerDN.equals(subjectDN)) {
-                //throw new IOException("Root CA certificate is missing in the chain.");
-            	//fullChain.add(rootCert);	
-            	
-            	//So the above rootCert is not the root certificate
-            	//So we need to get new suitable root certificate
-            	X509Certificate realRootCX509Certificate = RootCALoader.loadRootCA();
-            	fullChain.add(realRootCX509Certificate);
-            }
-            else {
-            	System.out.println("Root CA is already present in the chain.");
-            }
+            if (!lastCert.getSubjectX500Principal().equals(lastCert.getIssuerX500Principal())) {
+				System.out.println("The last certificate in the chain is not self-signed.");
+			}
             
+            if(userCert.equals(lastCert)) {
+				System.out.println("User certificate is the last certificate in the chain.");
+			}
+        	
+            List<X509Certificate> fullChain = new ArrayList<>();
+
+            System.out.println("Certificate Chain:");
+            for(Certificate cert : certChain) {
+				if (cert instanceof X509Certificate) {
+					fullChain.add((X509Certificate) cert);
+					//Print every certificate in the chain
+					//System.out.println("Certificate: " + ((X509Certificate) cert).getSubjectX500Principal());
+					
+				}
+			}  
             
             JcaCertStore certStore = new JcaCertStore(fullChain);
 
@@ -101,16 +112,16 @@ public class EpassSignature implements SignatureInterface {
                     new JcaSignerInfoGeneratorBuilder(
                             new JcaDigestCalculatorProviderBuilder().build()
                     )
-                            .setSignedAttributeGenerator(new DefaultSignedAttributeTableGenerator(getSignedAttribute(cert)))
-                            .build(contentSigner, cert)
+                            .setSignedAttributeGenerator(new DefaultSignedAttributeTableGenerator(getSignedAttribute(userCert)))
+                            .build(contentSigner, userCert)
             );
             generator.addCertificates(certStore);
 
             CMSSignedData signedData = generator.generate(cmsData, false);
 
             // Add timestamp token (TSA)
-            TimeStampToken tsToken = TSAClient.getTimeStampToken(signedData.getEncoded());
-            signedData = TimeStampDataConvertor.addTimestampToSignature(signedData, tsToken);
+            //TimeStampToken tsToken = TSAClient.getTimeStampToken(signedData.getEncoded());
+            //signedData = TimeStampDataConvertor.addTimestampToSignature(signedData, tsToken);
 
             return signedData.getEncoded();
         } catch (Exception e) {

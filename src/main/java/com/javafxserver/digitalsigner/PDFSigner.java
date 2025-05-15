@@ -135,7 +135,7 @@ public class PDFSigner {
     	PDAcroForm acroForm = ensureAcroForm(document);
     	        
         // Generate a unique and descriptive field name
-        String uniqueFieldName = "Signature_Page" + (document.getPages().indexOf(page) + 1) + "_" + java.util.UUID.randomUUID();
+        String uniqueFieldName = "Sign_Page" + (document.getPages().indexOf(page) + 1) + "_" + java.util.UUID.randomUUID();
 
         // Check if a field with the same name already exists
         if (acroForm.getField(uniqueFieldName) != null) {
@@ -185,7 +185,7 @@ public class PDFSigner {
             contentStream.newLineAtOffset(rect.getLowerLeftX() + 5, rect.getUpperRightY() - 15);
             
             //float lineHeight = font.getFontDescriptor().getCapHeight() / 1000 * SIGNATURE_FONT_SIZE;
-            float lineHeight = 12f;
+            float lineHeight = 12.0f;
             contentStream.showText("Digitally signed by:");
             contentStream.newLineAtOffset(0, -lineHeight);
             

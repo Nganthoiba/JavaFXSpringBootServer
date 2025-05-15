@@ -38,7 +38,7 @@ public class JSONSigner {
 		
 		headerMap.put("kid", getThumbPrint(tokenService.getCertificate()));//Widely Used
 		headerMap.put("x5c", List.of(Base64.getEncoder().encodeToString(
-			    tokenService.getCertificate().getEncoded())));
+			    tokenService.getCertificate().getEncoded()).trim()));
 		
 		
 		PrivateKey privateKey = tokenService.getPrivateKey();

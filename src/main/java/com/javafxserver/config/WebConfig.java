@@ -22,10 +22,20 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
 		//corsService.setAllowedOrigins(Arrays.asList(allowedOrigins));
 		corsService.setAllowedOrigins(Config.getCorsOrigins());
-        registry.addMapping("/**") // Apply to all endpoints
-                .allowedOrigins(corsService.getAllowedOrigins().toArray(new String[0])) 
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+		
+		if(corsService.getAllowedOrigins().isEmpty()) {
+			// If no origins are specified, allow all origins
+			registry.addMapping("/**")
+				.allowedOrigins("*")
+				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
+		} else {
+			// If specific origins are specified, apply them
+			registry.addMapping("/**")
+				.allowedOrigins(corsService.getAllowedOrigins().toArray(new String[0]))
+				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+				.allowedHeaders("*");
+		}
     }
 	
 	@Override

@@ -1,6 +1,7 @@
 # Maven target directory
 /target/
-
+/target/*.*
+target/*.*
 # Logs
 *.log
 

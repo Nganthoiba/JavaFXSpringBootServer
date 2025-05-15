@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><Person>
+    <Name>John Doe</Name>
+    <Email>john.doe@example.com</Email>
+    <Phone>+1-202-555-0147</Phone>
+    <Address>
+        <Street>123 Main St</Street>
+        <City>Springfield</City>
+        <State>IL</State>
+        <ZipCode>62704</ZipCode>
+    </Address>
+<Signature xmlns="http://www.w3.org/2000/09/xmldsig#"><SignedInfo><CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/><SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><Reference URI=""><Transforms><Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/></Transforms><DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><DigestValue>iW97cy6bRaUE74TYNsPcOhq6cG8z2VJpIXdMPjYyM0E=</DigestValue></Reference></SignedInfo><SignatureValue>UtC5Q0AdkAo5rkgW8oFavzvEEm6ZJVH1Ad5rvBIEs8LeLKVVeGSMSc7iJtnsx5rIWtm842pB99Ue&#13;
+1xmEJFqUC7zOsm1MCHwVJ/0qkqViuqiRVEoucg5m05SkzdtQIytjn5bBfvvGJXookQzJ9b/WwqNV&#13;
+OIiySVOHkalPUyB1jBm/UDSBpEscaMvDYVQR9AWl+NQMiRwje0XCjkzqmbjkgpwsm++hWC1NFHO9&#13;
+ABdVhWCo2Tr1u8xfoqvPxEb2YDa0nFAz6ThfIK19GQDcWGEwvW8Ar8qlBk/51WTP28veTRcMq/0Y&#13;
++CotQw1ddco6D/m3S3UQZAmLg9T4CXUmQi6rUw==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIF2zCCBMOgAwIBAgIEY0UKyjANBgkqhkiG9w0BAQsFADB7MQswCQYDVQQGEwJJTjEoMCYGA1UE&#13;
+ChMfRnV0dXJpUSBTeXN0ZW1zIFByaXZhdGUgTGltaXRlZDEPMA0GA1UECxMGU3ViLUNBMTEwLwYD&#13;
+VQQDEyhTaWduWCBzdWItQ0EgZm9yIENsYXNzIDMgSW5kaXZpZHVhbCAyMDIyMB4XDTI1MDQyNjEx&#13;
+MDQyOFoXDTI4MDQyNjExMDQyOFowggEqMQswCQYDVQQGEwJJTjERMA8GA1UEChMIUGVyc29uYWwx&#13;
+KTAnBgNVBEETIGQxZ29hN3duZjVsOHRpemhlOXA0MHE2YzJ4M3NqbWJ5MUkwRwYDVQQUE0BiOWNk&#13;
+N2RhMDQ1ZjVhZjY1NGQ4YjM0YmJhNjRlYzliZmFhYjE5ZGMwN2MyODk1ZjkxNzcwNjk0ZTI0ODM5&#13;
+ZTIwMQ8wDQYDVQQREwY3OTUxNDAxEDAOBgNVBAgTB01hbmlwdXIxSTBHBgNVBAUTQDBlMDc2MGVh&#13;
+YWQ0NTliMDI0N2VkZGU5NmZhN2NhZmRmMDcwOGMwMzMxYzdkNmJhNjRkN2UzN2M0YWU5MzMzYTcx&#13;
+JDAiBgNVBAMTG0tIQU5HRU5CQU0gTkdBTlRIT0lCQSBBTkdPTTCCASIwDQYJKoZIhvcNAQEBBQAD&#13;
+ggEPADCCAQoCggEBAL9BXS8zl6KIbCUe/+ycj733GOXhf+1lYZ8wt7eGDIlW84sxxvCG8dNFce0d&#13;
+q0D6s6E9IlY8N1DYKgHj36A9mAyPCgERsWdbDThBspAOSA9uwDyIFFb8ZlnhYbjrt4fA4KuiA86U&#13;
+30wttVsFVFWFrAvEgVJeuS9rfV7LUPJsfgCeFHgAC7PggOoBy2WHUtbOwW/2+sv1N/T4OdyCcTyI&#13;
+I3ukNY3LE7Cb8H8toWgNS/rzsniO+JFR72BAMfs1UlcdV3bRo4h15EplYXL/mZJAqc8cOMzH50Xx&#13;
+Xj2vKIdQLt03dnoXSvFkEfDmZpMEA0/GoaSTFelZCORwduE4uI8QTqkCAwEAAaOCAbQwggGwMBMG&#13;
+A1UdIwQMMAqACEBK9rTN50KMMBEGA1UdDgQKBAhD9wMiNo9xMDCBlQYIKwYBBQUHAQEEgYgwgYUw&#13;
+SAYIKwYBBQUHMAKGPGh0dHBzOi8vc2lnbnhjYS5jb20vcmVwb3NpdG9yeS9haWEvU2lnblhDbGFz&#13;
+czNJbmRpdmlkdWFsLmNlcjA5BggrBgEFBQcwAYYtaHR0cDovL29jc3Auc2lnbnhjYS5jb20vU2ln&#13;
+blhDbGFzczNJbmRpdmlkdWFsME0GA1UdHwRGMEQwQqBAoD6GPGh0dHBzOi8vc2lnbnhjYS5jb20v&#13;
+cmVwb3NpdG9yeS9jcmwvU2lnblhDbGFzczNJbmRpdmlkdWFsLmNybDAdBgNVHSAEFjAUMAgGBmCC&#13;
+ZGQCAzAIBgZggmRkAgIwDAYDVR0TAQH/BAIwADBABgNVHSUEOTA3BggrBgEFBQcDAgYIKwYBBQUH&#13;
+AwQGCSqGSIb3LwEBBQYKKwYBBAGCNwoDDAYKKwYBBAGCNxQCAjAgBgNVHREEGTAXgRVraGFuZ2Vt&#13;
+YmFtY0BnbWFpbC5jb20wDgYDVR0PAQH/BAQDAgbAMA0GCSqGSIb3DQEBCwUAA4IBAQBj7P8t0fDE&#13;
+0ijQdD+z7RxKKaX1ol16P3Slami7tyYrwhJn/0Zel2ivRpuRUl2MoEHjK3L8ePrDfc/Ur7iWOZTu&#13;
+cLDi9EsjN42QE7JGQ31aiW4nDaDv5YQYH2+9HkXBTX9VsKv7wvaNzOlRbU4aIDFC6Y7DCDlxvlSP&#13;
+uCIiYhPYF1DU6rKesAl0Ikov/RAcOgJir6zLTWDqM03eiap+DfT91T4HzFCbzZbbu02jBRPq4vSO&#13;
+VgQo8mZ2iDIWyN/jEpXpWZllFe5KeuspnyWV1whW6dYmPlHpY9jxGDvSmyJOZ0P14pF3PDmuOXqn&#13;
+fPK7jfyNVEhpZz4HIjXEPL7jqT6N</X509Certificate></X509Data></KeyInfo></Signature></Person>

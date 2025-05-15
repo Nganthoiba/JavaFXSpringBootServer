@@ -1,22 +1,29 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>eSign Upload</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
     <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" th:href="@{/css/custom.css}" />
+    <!-- Prism CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
 </head>
+
 <body>
     <div class="container my-2">
+        <a href="/" class="btn btn-secondary mb-3">Back to Home</a>
         <h3 class="text-center">Upload PDF File to be Digitally Signed</h3>
-        
+
         <div class="row justify-content-center">
             <div class="col-md-5">
                 <form id="esignPdfForm" action="/api/esignPDF" method="POST" enctype="multipart/form-data">
                     <div class="form-group mb-3">
                         <label for="file">Select file to upload:</label>
-                        <input type="file" id="file" name="pdf_file" accept=".pdf" required class="form-control" aria-label="Upload PDF File">
+                        <input type="file" id="file" name="pdf_file" accept=".pdf" required class="form-control"
+                            aria-label="Upload PDF File">
                     </div>
                     <div class="form-group mb-3">
                         <label>Set coordinates for signature:</label>
@@ -31,11 +38,11 @@
                             </div>
                         </div>
                     </div>
-					<div class="form-group mb-3">
+                    <div class="form-group mb-3">
                         <label for="file">Page number where the signature will appear:</label>
-                        <input type="number" id="pageNo" name="pageNo" value = "1" class="form-control">
+                        <input type="number" id="pageNo" name="pageNo" value="1" class="form-control">
                     </div>
-					<div class="form-group mb-3">
+                    <div class="form-group mb-3">
                         <label for="location">Reason:</label>
                         <input type="text" id="reason" name="reason" class="form-control">
                     </div>
@@ -43,11 +50,151 @@
                         <label for="location">Location:</label>
                         <input type="text" id="location" name="location" class="form-control">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Upload & E-Sign</button>
+                    <div class="d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary">Upload & E-Sign</button>
+
+                        <!-- Button trigger modal for showing developer's guide line for implementation of digitally signing XML content -->
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                            data-bs-target="#devsGuideModal">
+                            Show Devs Guide
+                        </button>
+                    </div>
+
                 </form>
+
             </div>
             <div class="col-md-7" id="serverResponse">
                 <!-- Lazy-loaded server response -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for developer's guide, on how to implement -->
+    <div class="modal fade" id="devsGuideModal" tabindex="-1" aria-labelledby="devsGuideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="devsGuideModalLabel">Developer's Guide</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>To implement the digital signing of PDF content, follow these steps:</p>
+                    <ol>
+                        <li>Ensure you have a valid PDF file to sign.</li>
+                        <li>Use the provided API endpoint <code>http://localhost:8090/api/esignPDF</code> or
+                            <code>https://localhost:8443/api/esignPDF</code> to send the PDF
+                            file.
+                        </li>
+                        <li>The API will return the signed PDF content.</li>
+                        <li>Handle the response correctly and display any errors that may occur.</li>
+                    </ol>
+                    <label for="#">Source Code</label>
+                    <h6>HTML Section</h6>
+                    <pre>
+                        <code class="language-html">
+&lt;form id=&quot;esignPdfForm&quot; action=&quot;http://localhost:8090/api/esignPDF&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;
+    &lt;div class=&quot;form-group mb-3&quot;&gt;
+        &lt;label for=&quot;file&quot;&gt;Select file to upload:&lt;/label&gt;
+        &lt;input type=&quot;file&quot; id=&quot;file&quot; name=&quot;pdf_file&quot; accept=&quot;.pdf&quot; required class=&quot;form-control&quot;
+            aria-label=&quot;Upload PDF File&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group mb-3&quot;&gt;
+        &lt;label&gt;Set coordinates for signature:&lt;/label&gt;
+        &lt;div class=&quot;d-flex gap-3&quot;&gt;
+            &lt;div&gt;
+                &lt;label for=&quot;x&quot;&gt;X:&lt;/label&gt;
+                &lt;input type=&quot;number&quot; id=&quot;x&quot; name=&quot;x&quot; value=&quot;340&quot; class=&quot;form-control&quot;&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+                &lt;label for=&quot;y&quot;&gt;Y:&lt;/label&gt;
+                &lt;input type=&quot;number&quot; id=&quot;y&quot; name=&quot;y&quot; value=&quot;760&quot; class=&quot;form-control&quot;&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group mb-3&quot;&gt;
+        &lt;label for=&quot;file&quot;&gt;Page number where the signature will appear:&lt;/label&gt;
+        &lt;input type=&quot;number&quot; id=&quot;pageNo&quot; name=&quot;pageNo&quot; value=&quot;1&quot; class=&quot;form-control&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group mb-3&quot;&gt;
+        &lt;label for=&quot;location&quot;&gt;Reason:&lt;/label&gt;
+        &lt;input type=&quot;text&quot; id=&quot;reason&quot; name=&quot;reason&quot; class=&quot;form-control&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;form-group mb-3&quot;&gt;
+        &lt;label for=&quot;location&quot;&gt;Location:&lt;/label&gt;
+        &lt;input type=&quot;text&quot; id=&quot;location&quot; name=&quot;location&quot; class=&quot;form-control&quot;&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary w-100&quot;&gt;Upload &amp; E-Sign&lt;/button&gt;
+&lt;/form&gt;
+&lt;div class="col-md-7" id="serverResponse"&gt;
+    <!-- Lazy-loaded server response -->
+&lt;/div&gt;
+                        </code>
+                    </pre>
+
+                    <h6>JavaScript Section</h6>
+                    <pre>
+                        <code class="language-javascript">
+document.addEventListener("DOMContentLoaded", () => {
+    const esignPdfForm = document.getElementById("esignPdfForm");
+
+    esignPdfForm.onsubmit = async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(esignPdfForm);
+        const serverResponseDiv = document.getElementById("serverResponse");
+
+        try {
+            serverResponseDiv.innerHTML = "Wait please ...";
+            const response = await fetch(esignPdfForm.action, {
+                method: "POST",
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) {
+                const responseData = await response.json();
+                throw new Error(responseData.message || "An error occurred");
+            }
+
+            // Lazy load the response
+            const pdfBlob = await response.blob();
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+
+            // Create a hidden iframe
+            const iframe = document.createElement("iframe");
+            iframe.src = pdfUrl;
+            iframe.width = "100%";
+            iframe.height = "600px";
+            iframe.style.display = "none";
+
+            serverResponseDiv.innerHTML = "";
+            serverResponseDiv.appendChild(iframe);
+
+            // Use IntersectionObserver for lazy loading
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        iframe.style.display = "block";  // Reveal iframe when in view
+                        observer.disconnect();  // Stop observing once loaded
+                    }
+                });
+            });
+
+            observer.observe(serverResponseDiv);
+        } catch (error) {
+            console.error("Error in client-side request:", error);
+            serverResponseDiv.innerHTML = error.message;
+            alert(error.message);
+        }
+    };
+});
+                        </code>
+                    </pre>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -57,14 +204,14 @@
         document.addEventListener("DOMContentLoaded", () => {
             const esignPdfForm = document.getElementById("esignPdfForm");
 
-            esignPdfForm.onsubmit = async function(event) {
+            esignPdfForm.onsubmit = async function (event) {
                 event.preventDefault();
 
                 const formData = new FormData(esignPdfForm);
                 const serverResponseDiv = document.getElementById("serverResponse");
 
                 try {
-					serverResponseDiv.innerHTML = "Wait please ...";
+                    serverResponseDiv.innerHTML = "Wait please ...";
                     const response = await fetch(esignPdfForm.action, {
                         method: "POST",
                         body: formData,
@@ -103,11 +250,17 @@
                     observer.observe(serverResponseDiv);
                 } catch (error) {
                     console.error("Error in client-side request:", error);
-					serverResponseDiv.innerHTML = error.message;
+                    serverResponseDiv.innerHTML = error.message;
                     alert(error.message);
                 }
             };
         });
     </script>
+    <!-- Prism JS -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
 </body>
+
 </html>
