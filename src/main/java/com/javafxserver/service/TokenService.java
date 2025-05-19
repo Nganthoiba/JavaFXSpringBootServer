@@ -24,6 +24,7 @@ import javax.naming.InvalidNameException;
 import com.javafxserver.config.Config;
 import com.javafxserver.exceptions.EpassTokenDetectionException;
 import com.javafxserver.exceptions.InvalidPinException;
+import com.javafxserver.exceptions.NoCertificateFoundException;
 import com.javafxserver.exceptions.SunPKCS11NotFoundException;
 import com.javafxserver.utils.TokenUtil;
 import com.javafxserver.digitalsigner.CertificateInfo;
@@ -37,7 +38,20 @@ public class TokenService {
     private PublicKey publicKey;
     private char[] currentPin;    
 	
-	public boolean detectToken(File configFile, String secretPin) 
+    /**
+     * Method to load the PKCS#11 provider, KeyStore, private key and public key using the provided configuration file and PIN.
+     * @param configFile
+     * @param secretPin
+     * @return (boolean) true if the token is loaded successfully, false otherwise
+     * @throws KeyStoreException
+     * @throws EpassTokenDetectionException
+     * @throws NoSuchAlgorithmException
+     * @throws CertificateException
+     * @throws IOException
+     * @throws UnrecoverableKeyException
+     * @throws InvalidPinException
+     */
+	public boolean loadToken(File configFile, String secretPin) 
 			throws KeyStoreException, 
 			EpassTokenDetectionException, 
 			NoSuchAlgorithmException, 
@@ -161,7 +175,9 @@ public class TokenService {
         return certificateInfoList;
     }
     
-    public String getCertificateAlias() throws Exception {
+    
+    //Method to get the first alias
+    public String getFirstCertificateAlias() throws Exception {
         Enumeration<String> aliases = keyStore.aliases();
         while (aliases.hasMoreElements()) {
             String alias = aliases.nextElement();
@@ -172,7 +188,9 @@ public class TokenService {
         throw new Exception("No alias with a private key found.");
     }
     
-    public X509Certificate getCertificate() throws Exception {
+    //Method to get the first certificate
+    public X509Certificate getFirstX509Certificate() 
+    		throws KeyStoreException, NoCertificateFoundException{
         if (keyStore == null) {
             throw new IllegalStateException("KeyStore is not initialized. Call detectToken() first.");
         }
@@ -187,9 +205,26 @@ public class TokenService {
                 }
             }
         }
-
-        throw new Exception("No valid X.509 certificate found in the token.");
+        throw new NoCertificateFoundException("No valid X.509 certificate found in the token.");
     }
+    
+    //Method to get the full certificate chain
+    public List<X509Certificate> getX509CertificateChain() throws KeyStoreException {
+		List<X509Certificate> certChain = new ArrayList<>();
+		Enumeration<String> aliases = keyStore.aliases();
+		while (aliases.hasMoreElements()) {
+			String alias = aliases.nextElement();
+			if (keyStore.isKeyEntry(alias)) {
+				java.security.cert.Certificate[] chain = keyStore.getCertificateChain(alias);
+				for (java.security.cert.Certificate cert : chain) {
+					if (cert instanceof X509Certificate) {
+						certChain.add((X509Certificate) cert);
+					}
+				}
+			}
+		}
+		return certChain;
+	}
     
     
     public void cleanup() {

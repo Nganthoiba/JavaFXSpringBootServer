@@ -2,6 +2,7 @@ package com.javafxserver;
 
 import com.javafxserver.fxcontrollers.MainViewController;
 import com.javafxserver.service.ServerServiceHandler;
+import com.javafxserver.service.USBTokenDetector;
 import com.javafxserver.utils.LogWriter;
 import com.javafxserver.utils.UIUtils;
 
@@ -17,13 +18,12 @@ public class MainApp extends Application{
     public void init() {
 		//Config.createAppPath();
 		try {
-			applicationCssString = getClass().getResource("/styles/application.css").toExternalForm();
-			System.out.println("CSS file loaded: " + applicationCssString);
-		} catch (Exception e) {
+			applicationCssString = getClass().getResource("/styles/application.css").toExternalForm();			
+		}
+		catch (Exception e) {
 			System.out.println("Error loading CSS file: " + e.getMessage());
 			e.printStackTrace();
-		}
-		
+		}		
     }	
 
     @Override

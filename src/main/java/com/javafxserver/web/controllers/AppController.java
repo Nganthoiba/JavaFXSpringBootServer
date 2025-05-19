@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.PublicKey;
+import java.text.ParseException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,70 +16,29 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.javafxserver.config.Config;
-import com.javafxserver.ui.DigiSignError;
-import com.javafxserver.ui.PinPrompt;
 import com.javafxserver.utils.ConvertFile;
+import com.javafxserver.utils.ResponseBuilder;
 import com.javafxserver.web.request.VerifyJsonRequest;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.Payload;
 import com.javafxserver.digitalsigner.Coordinate;
-import com.javafxserver.digitalsigner.Epass2003PDFSigner;
 import com.javafxserver.digitalsigner.JSONSigner;
 import com.javafxserver.digitalsigner.PDFSigner;
 import com.javafxserver.digitalsigner.Rectangle;
 import com.javafxserver.digitalsigner.SignatureDetail;
 import com.javafxserver.digitalsigner.TokenManager;
 import com.javafxserver.digitalsigner.XMLSigner;
-import com.javafxserver.exceptions.EmptyPinException;
 import com.javafxserver.exceptions.HandleExceptionMessage;
-import com.javafxserver.exceptions.TokenErrorTranslator;
-import com.javafxserver.exceptions.TokenInitializationFailedException;
-
 
 @RestController
+@RequestMapping("/api")
 public class AppController {
-	
-	@PostMapping("/api/simpleEssignPDF")
-	public ResponseEntity<Map<String, String>> simpleEssignPDF(
-			@RequestParam("pdf_file") MultipartFile multipartFile
-			) {
-		File tempFile = null;
-		try {
-			if (multipartFile.isEmpty()) {
-				throw new IllegalArgumentException("No file is uploaded");
-			}
-			initializeTokenIfNeeded(); 
-			tempFile = ConvertFile.toFile(multipartFile);
-			
-			File outputDir = new File(Config.APP_PATH + File.separator + "signedFiles");
-			if (!outputDir.exists()) {
-			    outputDir.mkdirs(); // Create the directory if it does not exist
-			}
-			File outputFile = new File(outputDir, "_signed.pdf");
-			
-			//tempFile.getAbsolutePath().replace(".pdf", "_signed.pdf");
-			String pkcs11LibraryPathString = Config.getEpassConfig().get("library")+"";
-			
-			Epass2003PDFSigner.signPDF(tempFile, outputFile, pkcs11LibraryPathString, Config.PIN);
-			
-		} catch (IllegalArgumentException | 
-				IndexOutOfBoundsException | 
-				IOException | 
-				URISyntaxException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
-		} finally {
-			if (tempFile != null && tempFile.exists()) {
-				tempFile.delete();
-			}
-		}
-		return ResponseEntity.status(HttpStatus.OK).body(Map.of("message", "Document Esigned Successfully"));
-	}
 
-    @PostMapping("/api/esignPDF")
+    @PostMapping("/esignPDF")
     public ResponseEntity<?> digitallySignPdf(
             @RequestParam("pdf_file") MultipartFile multipartFile,
             @RequestParam("x") float x,
@@ -96,7 +56,7 @@ public class AppController {
             if (multipartFile.isEmpty()) {
                 throw new IllegalArgumentException("No file is uploaded");
             }
-            initializeTokenIfNeeded(); 
+            TokenManager.initializeTokenIfNeeded(); 
             SignatureDetail signDetail = new SignatureDetail();
             signDetail.coordinate = new Coordinate(x, y);
             signDetail.location = location==null?"": location;
@@ -124,10 +84,10 @@ public class AppController {
         		IndexOutOfBoundsException | 
         		IOException | 
         		URISyntaxException e) {
-        	return buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+        	return ResponseBuilder.buildErrorResponse(e, HttpStatus.BAD_REQUEST);
 
         } catch (Exception e) {
-        	return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+        	return ResponseBuilder.buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
         } finally {
             if (tempFile != null && tempFile.exists()) {
                 tempFile.delete();
@@ -135,11 +95,11 @@ public class AppController {
         }
     }
     
-    @PostMapping("/api/esignJSON")
+    @PostMapping("/esignJSON")
     public ResponseEntity<String> esignJson(@RequestBody String jsonData) {
     	try {
-    		initializeTokenIfNeeded();            
-            String signedJson = JSONSigner.signJson(jsonData, TokenManager.tokenService); // Your signing logic
+    		TokenManager.initializeTokenIfNeeded();            
+            String signedJson = JSONSigner.signJson(jsonData, TokenManager.tokenService);
             return ResponseEntity.ok(signedJson);
         } 
     	catch(IllegalArgumentException | 
@@ -165,13 +125,13 @@ public class AppController {
      * @return
      */
     
-    @PostMapping("/api/verifyJSON")
+    @PostMapping("/verifyJSON")
     public ResponseEntity<Map<String, String>> verifySignedJson(@RequestBody VerifyJsonRequest signedJsonData){
     	String payload = signedJsonData.payload;
     	String signatureString = signedJsonData.signature;
     	
     	try {
-    		initializeTokenIfNeeded();
+    		TokenManager.initializeTokenIfNeeded();
             boolean verifyFlag = JSONSigner.verifySignature(payload, signatureString, TokenManager.tokenService.getPublicKey());
             return verifyFlag 
             	    ? ResponseEntity.ok(Map.of("message", "Valid JSON data.")) 
@@ -185,7 +145,7 @@ public class AppController {
     	
     }
     
-    @PostMapping("/api/verifyWholeJSON")
+    @PostMapping("/verifyWholeJSON")
     public ResponseEntity<Map<String, String>> verifyWholeSignedJson(@RequestBody String signedJsonString){
     	try {
     		ObjectMapper mapper = new ObjectMapper();
@@ -210,7 +170,7 @@ public class AppController {
     	}
     }
     
-    @PostMapping("/api/esignXMLfile")
+    @PostMapping("/esignXMLfile")
     public ResponseEntity<?> signXmlAndDownload(@RequestParam("xml_file") MultipartFile multipartFile) throws Exception {
     	byte[] signedXMLBytes = null;
     	File tempXMLFile = null;
@@ -218,7 +178,8 @@ public class AppController {
 			if (multipartFile.isEmpty()) {
 				throw new IllegalArgumentException("No file is uploaded");
 			}
-			initializeTokenIfNeeded(); 
+			
+			TokenManager.initializeTokenIfNeeded(); 
 			tempXMLFile = ConvertFile.toFile(multipartFile);
 			
 			signedXMLBytes = XMLSigner.signXML(tempXMLFile, TokenManager.tokenService);
@@ -235,10 +196,10 @@ public class AppController {
 				IndexOutOfBoundsException | 
 				IOException | 
 				URISyntaxException e) {
-			return buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+			return ResponseBuilder.buildErrorResponse(e, HttpStatus.BAD_REQUEST);
 
 		} catch (Exception e) {
-			return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+			return ResponseBuilder.buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
 		} finally {
 			if (tempXMLFile != null && tempXMLFile.exists()) {
 				tempXMLFile.delete();
@@ -248,14 +209,14 @@ public class AppController {
     }
     
     
-    @PostMapping("/api/esignXMLdata")
+    @PostMapping("/esignXMLdata")
     public ResponseEntity<?> signXmlAndDownload(@RequestBody String xmlData) {
         try {
             if (xmlData == null || xmlData.trim().isEmpty()) {
                 throw new IllegalArgumentException("No XML data is provided");
             }
 
-            initializeTokenIfNeeded();
+            TokenManager.initializeTokenIfNeeded();
             
             byte[] signedXMLByteData = XMLSigner.signXML(xmlData, TokenManager.tokenService);
 
@@ -271,58 +232,89 @@ public class AppController {
                     .body(responseMap);
 
         } catch (IllegalArgumentException e) {
-            return buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+            return ResponseBuilder.buildErrorResponse(e, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            return buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseBuilder.buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
+    @PostMapping("/getJWS")
+    public ResponseEntity<?> getJWS(@RequestBody String jsonData) {
+		try {
+			if (jsonData == null || jsonData.trim().isEmpty()) {
+				throw new IllegalArgumentException("No JSON data is provided");
+			}
+
+			TokenManager.initializeTokenIfNeeded();
+			
+			String jws = JSONSigner.generateJWS(jsonData, TokenManager.tokenService);
+
+			Map<String, String> responseMap = new HashMap<>();
+			responseMap.put("message", "JWS generated successfully.");
+			responseMap.put("jws", jws);
+			
+			//TokenManager.logoutToken();
+			return ResponseEntity.ok()
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(responseMap);
+
+		}
+		catch(JOSEException e) {
+			e.printStackTrace();
+			return ResponseBuilder.buildResponse("Unable to generate JSON Web Signature (JWS) string", HttpStatus.BAD_REQUEST, e.getMessage());
+		}
+		catch (IllegalArgumentException e) {
+			return ResponseBuilder.buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+		} catch (Exception e) {
+			return ResponseBuilder.buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
     
     /**
-     * This method will initialize token only if it is necessary
-     * @throws Exception
+     * This end point will verify the JWS data and responds with the header and payload if
+     * jws is valid otherwise it will respond with an error message
+     * 
+     * @param jwsString
+     * @return
+     * 
      */
-    private void initializeTokenIfNeeded() throws Exception{
-    	
-    	if(!TokenManager.isTokenPresent()) {
-    		throw new TokenInitializationFailedException("Token is not inserted or not detected, make sure that the usb token is inserted properly");
-    	}    	
-    	
-    	if(!TokenManager.isUSBTokenInitialized()) {
-        	if(Config.PIN != null && TokenManager.tokenError != null) {
-        		TokenManager.tokenError.displayErrorDialog();
-        		throw new Exception(TokenManager.tokenError.getTitle()+": "+TokenManager.tokenError.getMessage());            		
-        	}
-        	
-        	String secretPin = PinPrompt.requestUserPinBlocking(pin -> {
-                if (Config.PIN != null && !pin.equals(Config.PIN)) {
-                    return false;
-                }
-                return true;
-            });        	
-        	Config.PIN = secretPin;        	
-        }
-        
-        if(Config.PIN == null) {
-        	throw new EmptyPinException("You have not enter secret PIN");
-        }
-        
-        TokenManager.initializeToken(Config.PIN);        
-    }
-    
-    private ResponseEntity<Map<String, Object>> buildErrorResponse(Exception e, HttpStatus status) {
-        TokenManager.logoutToken();
-        e.printStackTrace();
-        
-        DigiSignError error = TokenErrorTranslator.getFriendlyMessage(e);
-        
-        Map<String, Object> errorBody = new HashMap<>();
-        errorBody.put("message", error.getTitle() + ": " + error.getMessage());
-        //errorBody.put("message", HandleExceptionMessage.getMessage(e));
-        errorBody.put("techDetails", error.getCausedBy());
-        errorBody.put("status", status.value());
-        return ResponseEntity.status(status)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(errorBody);
-    }
+    @PostMapping("/verifyJWS")
+    public ResponseEntity<?> verifyJWS(@RequestParam("jws") String jwsString) {
+    	try {
+    		if (jwsString == null || jwsString.trim().isEmpty()) {
+    			throw new IllegalArgumentException("No JWS data is provided");
+    		}
+    		
+    		boolean isValid = JSONSigner.verifyJWS(jwsString);
+    		if(!isValid) {
+    			throw new IllegalArgumentException("JWS is not a valid JWS string");
+    		}
+    		
+    		//Get header and payload from the jws    		
+    		Map<String, Object> headers = JSONSigner.verifyJWSAndExtractHeaders(jwsString); 
+    		Payload payload = JSONSigner.verifyJWSAndExtractPayload(jwsString);
+    		
+    		//Canonicalizing json string
+    		String canonicalizedJSONString = JSONSigner.canonicalizeJson(payload.toString());   		    		
+    		
+    		Map<String, Object> responseMap = new HashMap<>();
+			responseMap.put("message", "JWS string is valid.");
+			responseMap.put("header", headers);
+			responseMap.put("payload", new ObjectMapper().readTree(canonicalizedJSONString));
+			
+			return ResponseEntity.ok()
+					.contentType(MediaType.APPLICATION_JSON)
+					.body(responseMap);
+    	}
+    	catch(ParseException e) {
+            return ResponseBuilder.buildResponse("The JWS string is not valid", HttpStatus.BAD_REQUEST, e.getMessage());
+    	}
+    	catch(IllegalArgumentException e) {
+			return ResponseBuilder.buildErrorResponse(e, HttpStatus.BAD_REQUEST);
+		}
+		catch(Exception e) {
+			return ResponseBuilder.buildErrorResponse(e, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+    } 
+   
 }

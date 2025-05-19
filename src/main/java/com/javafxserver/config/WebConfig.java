@@ -21,6 +21,11 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
     public void addCorsMappings(CorsRegistry registry) {
 		//corsService.setAllowedOrigins(Arrays.asList(allowedOrigins));
+		
+		//By default retrieve all the cors.allowed-origins from the application.properties file and then addthem to the config
+		for(String origin : allowedOrigins) {
+			Config.addCorsOrigin(origin);
+		}
 		corsService.setAllowedOrigins(Config.getCorsOrigins());
 		
 		if(corsService.getAllowedOrigins().isEmpty()) {

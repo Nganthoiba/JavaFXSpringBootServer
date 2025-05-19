@@ -43,6 +43,7 @@ D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\service\ServerS
 D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\service\ServerServiceHandler.java
 D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\service\TokenMonitorService.java
 D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\service\TokenService.java
+D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\service\USBTokenDetector.java
 D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\ui\DigiSignError.java
 D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\ui\PasswordDialog.java
 D:\eclipse\JavaFXSpringBootServer\src\main\java\com\javafxserver\ui\PinPrompt.java

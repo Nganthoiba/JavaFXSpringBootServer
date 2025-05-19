@@ -11,14 +11,14 @@
 </head>
 <body>
     <div class="container my-5">
-        <h3 class="text-center mb-4">Digital Signature Demo Page</h3>
+        <h3 class="text-center mb-4" th:text = "${heading}">Digital Signature Demo Page</h3>
 
         <section class="row row-cols-1 row-cols-md-3 g-4">
             <!-- Card 1 -->
             <article class="col">
                 <div class="card h-100 text-center">
                     <div class="card-body">
-                        <h5 class="card-title">Sign PDF</h5>
+                        <h5 class="card-title">eSign PDF</h5>
                         <p class="card-text">Digitally sign your PDF documents securely.</p>
                         <a href="/esignPDF" class="btn btn-primary" aria-label="Sign PDF">Click Here</a>
                     </div>
@@ -28,17 +28,30 @@
             <article class="col">
                 <div class="card h-100 text-center">
                     <div class="card-body">
-                        <h5 class="card-title">Sign JSON</h5>
+                        <h5 class="card-title">eSign JSON</h5>
                         <p class="card-text">Apply digital signatures to your JSON data.</p>
 						<a href="/esignJSON" class="btn btn-primary" aria-label="Sign JSON">Click Here</a>
                     </div>
                 </div>
             </article>
-            <!-- Card 3 -->
+			
+			<!-- Card 3 -->
+			<article class="col">
+                <div class="card h-100 text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">eSign JSON & get JWS</h5>
+                        <p class="card-text">Apply digital signatures to your JSON data and get Json Web Signature.</p>
+						<a href="/esignJSON-JWS" class="btn btn-primary" aria-label="Sign JSON">Click Here</a>
+                    </div>
+                </div>
+            </article>			
+			
+			
+            <!-- Card 4 -->
             <article class="col">
                 <div class="card h-100 text-center">
                     <div class="card-body">
-                        <h5 class="card-title">Sign XML</h5>
+                        <h5 class="card-title">eSign XML</h5>
                         <p class="card-text">Secure your XML files with digital signatures.</p>
 						<a href="/esignXML" class="btn btn-primary" aria-label="Sign XML">Click Here</a>
                     </div>

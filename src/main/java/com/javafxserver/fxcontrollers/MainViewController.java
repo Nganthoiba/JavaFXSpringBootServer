@@ -165,7 +165,7 @@ public class MainViewController {
     @FXML
     public void openDemoInBrowser(ActionEvent event) {
     	int httpPort = Config.getHttpPort();
-    	String url = "http://localhost:" + httpPort + "/demo";
+    	String url = "http://localhost:" + httpPort + "/";
     	if(hostServices != null) {
     		hostServices.showDocument(url);
     	}

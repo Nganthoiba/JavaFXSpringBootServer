@@ -111,9 +111,8 @@ public class SettingDialogExample extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        httpPortField.setDisable(true);
-        httpsPortField.setDisable(true);
-        
+        //httpPortField.setDisable(true);
+        //httpsPortField.setDisable(true);        
     }
 
     private void saveSettings() throws Exception{        

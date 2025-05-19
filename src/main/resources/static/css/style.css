@@ -14,14 +14,11 @@ body {
   text-align: center;
   color: #333;
 }
-
-form {
-  max-width: 500px;
-  margin: 30px auto;
-  padding: 25px;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.card{
+	background: #fff;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+	border-radius: 8px;
+	border: none;
 }
 
 .form-group {
@@ -34,17 +31,6 @@ label {
   font-weight: 600;
   color: #444;
 }
-
-input[type="file"],
-input[type="number"],
-input[type="text"] {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
 
 .d-flex{
 	display: flex;

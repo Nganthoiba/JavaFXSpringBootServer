@@ -15,22 +15,28 @@ public class PagesController {
 		return "This is a test for string in response body";
 	}
     
-	@GetMapping("/")	
+	@GetMapping("/index")	
 	public String index(Model model) {
-		//model.addAttribute("message", "Hello! this is from Spring Boot and Thymeleaf");
-		//return "index";
-		return "demo";
+		model.addAttribute("message", "Hello! this is from Spring Boot and Thymeleaf");
+		return "index";
 	}
 	
-	@GetMapping("/demo")
-	public String demo() {		
+	@GetMapping("/")
+	public String demo(Model model) {		
+		model.addAttribute("title", "Demo");
+		model.addAttribute("heading", "Demostration Page For Digital Signer");
 		return "demo";
 	}
 	
 	@GetMapping("/esignPDF")
-	public String esignPDF() {
+	public String esignPDF(Model model) {
 		// Logout token forcefully if there is already a session
 		TokenManager.logoutToken();
+		
+		model.addAttribute("title", "Esign PDF");
+        //model.addAttribute("content", "esignPDF"); // Dynamically selects the child template
+        
+        //return "baseLayout"; // Parent template
 		return "esignPDF";
 	}
 	
@@ -39,6 +45,13 @@ public class PagesController {
 		// Logout token forcefully if there is already a session
 		TokenManager.logoutToken();
 		return "esignJSON";
+	}
+	
+	@GetMapping("/esignJSON-JWS")
+	public String esignJSONJWS() {
+		// Logout token forcefully if there is already a session
+		TokenManager.logoutToken();
+		return "esignJSON-JWS";
 	}
 	
 	@GetMapping("/esignXML")

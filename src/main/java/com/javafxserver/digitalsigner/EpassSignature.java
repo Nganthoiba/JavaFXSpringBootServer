@@ -23,6 +23,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 import com.javafxserver.exceptions.DigitalSigningException;
 import com.javafxserver.exceptions.NoCertificateChainException;
 import com.javafxserver.exceptions.NoCertificateFoundException;
+import com.javafxserver.service.TokenService;
 
 import org.bouncycastle.asn1.DERSet;
 import org.bouncycastle.asn1.cms.Attribute;
@@ -39,11 +40,11 @@ import javax.security.auth.x500.X500Principal;
 import org.bouncycastle.asn1.x500.X500Name;
 
 public class EpassSignature implements SignatureInterface {
-    public final TokenDetails tokenDetails;
+    public final TokenService tokenService;
     public final String pin;
 
-    public EpassSignature(TokenDetails tokenDetails, String pin) {
-        this.tokenDetails = tokenDetails;
+    public EpassSignature(TokenService tokenService, String pin) {
+        this.tokenService = tokenService;
         this.pin = pin;
     }
 
@@ -51,35 +52,34 @@ public class EpassSignature implements SignatureInterface {
     public byte[] sign(InputStream content) throws IOException {
         try {
             byte[] contentBytes = content.readAllBytes();
-            Provider pkcs11Provider = tokenDetails.getPkcs11Provider();
+            Provider pkcs11Provider = tokenService.getPkcs11Provider();
 
             CMSProcessableByteArray cmsData = new CMSProcessableByteArray(contentBytes);
-            Enumeration<String> aliases = tokenDetails.getKeyStore().aliases();
-
-            String alias = null;
-            while (aliases.hasMoreElements()) {
-                String candidate = aliases.nextElement();
-                if (tokenDetails.getKeyStore().isKeyEntry(candidate)) {
-                    alias = candidate;
-                    break;
-                }
-            }
+            
+            String alias = tokenService.getFirstCertificateAlias();
             if (alias == null) {
                 throw new NoCertificateFoundException("No private key entry found in the token.", 
                 		new IOException("The KeyStore has no alias"));
             }
 
-            PrivateKey privateKey = (PrivateKey) tokenDetails.getKeyStore().getKey(alias, pin.toCharArray());
-            X509Certificate userCert = (X509Certificate) tokenDetails.getKeyStore().getCertificate(alias);
+            PrivateKey privateKey = (PrivateKey) tokenService.getKeyStore().getKey(alias, pin.toCharArray());
+            X509Certificate userCert = (X509Certificate) tokenService.getKeyStore().getCertificate(alias);
 
-            Certificate[] certChain = tokenDetails.getKeyStore().getCertificateChain(alias);
-            if (certChain == null || certChain.length == 0) {
+            //Certificate[] certChain = tokenService.getKeyStore().getCertificateChain(alias);
+            List<X509Certificate> fullChain = tokenService.getX509CertificateChain();
+
+            System.out.println("Certificate Chain:");
+            for(X509Certificate cert : fullChain) {
+            	System.out.println("Certificate: " + cert.getSubjectX500Principal());
+            }
+            
+            if (fullChain == null || fullChain.isEmpty()) {
                 throw new NoCertificateChainException("No certificate chain found in token.");
             }
             
             // The last certificate in the chain should be the root CA.
             // Check if the last certificate is self-signed:
-            X509Certificate lastCert = (X509Certificate) certChain[certChain.length - 1];//user certificate
+            X509Certificate lastCert = fullChain.get(fullChain.size()-1);//user certificate
             
             if (!lastCert.getSubjectX500Principal().equals(lastCert.getIssuerX500Principal())) {
 				System.out.println("The last certificate in the chain is not self-signed.");
@@ -89,18 +89,6 @@ public class EpassSignature implements SignatureInterface {
 				System.out.println("User certificate is the last certificate in the chain.");
 			}
         	
-            List<X509Certificate> fullChain = new ArrayList<>();
-
-            System.out.println("Certificate Chain:");
-            for(Certificate cert : certChain) {
-				if (cert instanceof X509Certificate) {
-					fullChain.add((X509Certificate) cert);
-					//Print every certificate in the chain
-					//System.out.println("Certificate: " + ((X509Certificate) cert).getSubjectX500Principal());
-					
-				}
-			}  
-            
             JcaCertStore certStore = new JcaCertStore(fullChain);
 
             ContentSigner contentSigner = new JcaContentSignerBuilder("SHA256withRSA")

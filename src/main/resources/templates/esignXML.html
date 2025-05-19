@@ -7,12 +7,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
 	<link rel="stylesheet" th:href="@{/css/custom.css}" />
-	<!-- Prism CSS -->
-	<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+	<!-- Prism CSS 
+	<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />-->
+	<link rel="stylesheet" th:href="@{/css/prism/prism.css}" />
 </head>
 
 <body>
-	<div class="container my-5">
+	<div class="container my-2">
 		<a href="/" class="btn btn-secondary mb-3">Back to Home</a>
 		<h3 class="text-center">Digitally Sign XML</h3>
 		<div class="row">
@@ -27,7 +28,7 @@
 					<button id="signButton" class="btn btn-primary">Sign XML</button>
 					<!-- Button trigger modal for showing developer's guide line for implementation of digitally signing XML content -->
 					<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#devsGuideModal">
-						Show Devs Guide
+						Show Dev's Guide
 					</button>
 				</div>
 			</div>
@@ -186,9 +187,15 @@ document.getElementById("signButton").addEventListener("click", signXML);
 		document.getElementById("signButton").addEventListener("click", signXML);
 	</script>
 	<!-- Prism JS -->
+	<script th:src="@{/js/prism/prism.js}"></script>
+	<script th:src="@{/js/prism/prism-javascript.js}"></script>
+	<script th:src="@{/js/prism/prism-markup.js}"></script>
+	
+	<!--
 	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+	-->
 </body>
 
 </html>

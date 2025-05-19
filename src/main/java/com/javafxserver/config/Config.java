@@ -20,6 +20,7 @@ public class Config {
     public static final String CONFIG_FILE_PATH = APP_PATH + File.separator + "config.json";
 
     public static final String STORAGE_PATH = APP_PATH + File.separator + "storage";
+    public static final String SIGNED_PATH = STORAGE_PATH + File.separator + "signed";
     public static final String PUBLIC_PATH = System.getProperty("user.dir") + File.separator + "public";
 
     public static final int DEFAULT_HTTP_PORT = 8090;

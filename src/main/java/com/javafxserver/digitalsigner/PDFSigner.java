@@ -1,5 +1,6 @@
 package com.javafxserver.digitalsigner;
 
+import com.javafxserver.config.Config;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -24,9 +25,12 @@ import java.awt.geom.AffineTransform;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -87,13 +91,21 @@ public class PDFSigner {
         signatureOptions.setPage(signDetail.pageNumber - 1);
         
         // Add signature to the document
-        document.addSignature(signature, new EpassSignature(tokenService.getTokenDetails(), pin), signatureOptions);
+        document.addSignature(signature, new EpassSignature(tokenService, pin), signatureOptions);
         
         /**
          * When saving the signed document, I use incremental saving to preserve existing content and signatures
          */
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            document.saveIncremental(outputStream);            
+            document.saveIncremental(outputStream);
+            // Create storage directory if it doesn't exist 
+            Files.createDirectories(Paths.get(Config.SIGNED_PATH));           
+            FileOutputStream fileOutputStream = new FileOutputStream(Config.SIGNED_PATH + File.separator + "signed_" + originalFile.getName());
+            
+            // Saving the signed document to a file
+            outputStream.writeTo(fileOutputStream);
+            System.out.println("Signed PDF saved to: " + Config.SIGNED_PATH + File.separator + "signed_" + originalFile.getName());
+            
             return outputStream.toByteArray();
         }        
         

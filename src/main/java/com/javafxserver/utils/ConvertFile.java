@@ -8,8 +8,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class ConvertFile {
 	public static File toFile(MultipartFile multipartFile) throws IOException {
 		try {
+			String originalFileName = multipartFile.getOriginalFilename();
 		    //File convFile = new File(multipartFile.getOriginalFilename());
-			File convFile = File.createTempFile(Config.STORAGE_PATH + File.separator + "uploaded_", ".pdf");
+			File convFile = File.createTempFile(Config.STORAGE_PATH + File.separator + originalFileName, ".pdf");
 			
 			if (!convFile.exists()) {
 			    convFile.createNewFile();
