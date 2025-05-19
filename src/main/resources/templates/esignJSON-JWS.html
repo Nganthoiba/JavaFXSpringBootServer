@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Digitally Sign JSON</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+	<link rel="stylesheet" th:href="@{/css/custom.css}" />
+	<!-- Prism CSS -->
+	<link rel="stylesheet" th:href="@{/css/prism/prism.css}" />
+</head>
+
+<body>
+	<div class="container my-2">
+		<a href="/" class="btn btn-secondary mb-3">Back to Home</a>
+		<h3 class="text-center">Digitally Sign JSON and get JSON web Signature</h3>
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="mb-3">
+					<label for="jsonInput" class="form-label">Enter JSON Data:</label>
+					<textarea id="jsonInput" class="form-control" rows="15" placeholder="Enter valid JSON here..."></textarea>
+				</div>
+
+				<div class="d-flex gap-3 mt-2">
+					<button id="signButton" class="btn btn-primary">Sign JSON</button>
+					<button id="verifyButton" class="btn btn-success">Verify Signature</button>
+					<!-- Button trigger modal for showing developer's guide line for implementation of digitally signing XML content -->
+					<button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#devsGuideModal">
+						Show Dev's Guide
+					</button>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<label for="outputField" class="form-label">JWS output:</label>
+				<textarea id="outputField" class="form-control" rows="15" readonly></textarea>
+				<div id="responseMessage" class="mt-2"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal for developer's guide, on how to implement -->
+	<div class="modal fade" id="devsGuideModal" tabindex="-1" aria-labelledby="devsGuideModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="devsGuideModalLabel">Developer's Guide</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<p>To implement the digital signing of JSON content and the get JSON web signature as output, follow these steps:</p>
+					<ol>
+						<li>Ensure you have a valid JSON content to sign.</li>
+						<li>Use the provided API endpoint <code>http://localhost:8090/api/getJWS</code> or
+							<code>https://localhost:8443/api/getJWS</code> for signng the JSON and 
+							<code>http://localhost:8090/api/verifyJWS</code> or
+							<code>https://localhost:8443/api/verifyJWS</code>
+							for verifying JSON Web Signature
+							respectively.
+						</li>
+						<li>Make sure to handle the response correctly and display any errors that may occur.</li>
+					</ol>
+					<label for="#">Source Code</label>
+					<h6>HTML Section</h6>
+					<pre>
+						<code class="language-markup">
+<pre><code class="language-html">
+&lt;div class="container"&gt;
+    &lt;h3 class="text-center"&gt;Digitally Sign JSON & get JWS&lt;/h3&gt;
+
+    &lt;div class="mb-3"&gt;
+        &lt;label for="jsonInput" class="form-label"&gt;Enter JSON Data:&lt;/label&gt;
+        &lt;textarea id="jsonInput" class="form-control" rows="5" placeholder="Enter valid JSON here..."&gt;&lt;/textarea&gt;
+    &lt;/div&gt;
+
+    &lt;div class="d-flex gap-3"&gt;
+        &lt;button id="signButton" class="btn btn-primary"&gt;Sign JSON&lt;/button&gt;  
+    &lt;/div&gt;
+
+    &lt;div class="mt-4"&gt;
+        &lt;label for="outputField" class="form-label"&gt;Signed JWS Output:&lt;/label&gt;
+        &lt;textarea id="outputField" class="form-control" rows="5" readonly&gt;&lt;/textarea&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+					</code>
+					</pre>
+
+					<label for="#">Javascript Section</label>
+					<p>For Signing JSON data:</p>
+					<pre><code class="language-javascript">
+var outputFleld = document.getElementById("outputField");
+async function signJson() {
+    const jsonData = document.getElementById("jsonInput").value.trim();
+    if (!jsonData) {
+        alert("Please enter JSON data.");
+        return;
+    }
+
+    try {
+        const parsedJson = JSON.parse(jsonData); // Validate JSON					
+        const signJSONUrl = "http://localhost:8090/api/getJWS";
+        try {
+            outputFleld.innerHTML = "Wait please ...";
+            const response = await fetch(signJSONUrl, {
+                method: "POST",
+                body: JSON.stringify(parsedJson),
+                headers: { 'Accept': 'application/json' }
+            });
+            const responseData = await response.json();
+            if (!response.ok) {
+                throw new Error(responseData.message || "An error occurred");
+            }
+            outputFleld.innerHTML = JSON.stringify(responseData, null, 4);
+        } catch (error) {
+            console.error("Error in client-side request:", error);
+            outputFleld.innerHTML = error.message;
+            alert(error.message);
+        }
+    } catch (error) {
+        alert("Invalid JSON format. Please correct and try again.");
+    }
+}
+document.getElementById("signButton").addEventListener("click", signJson);
+</code></pre>
+					<p>For Verifying JSON Web Signature:</p>
+					<pre><code class="language-javascript">
+async function verifyJWS() {
+	const output = document.getElementById("outputField").value.trim();
+	
+	try {
+		var responseJSON = JSON.parse(output);
+		var signedJWS = responseJSON.jws;
+		
+		if(!signedJWS){
+			alert("No Json Web Signature (JWS) found.");
+			return;
+		}
+		
+		var formData = new FormData();
+		formData.append("jws", signedJWS);
+
+		const verifyJWSUrl = "http://localhost:8090/api/verifyJWS";
+				
+		const response = await fetch(verifyJWSUrl, {
+			method: "POST",
+			body: formData,
+			headers: { 'Accept': 'application/json' }
+		});
+		const responseData = await response.json();
+
+		if (!response.ok) {
+
+			throw new Error(responseData.message || "An error occurred");
+		}
+		alert(responseData.message);
+
+		
+	} catch (error) {
+		if (error.message) {
+			alert(error.message);
+		}
+		else {
+			alert("Invalid signed JSON format.");
+		}
+	}
+}
+
+document.getElementById("verifyButton").addEventListener("click", verifyJWS);
+</code></pre>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Bootstrap Bundle JS -->
+	<script th:src="@{/js/bootstrap.bundle.js}"></script>
+	<script>
+		const responseMessage = document.getElementById("responseMessage");
+		var outputFleld = document.getElementById("outputField");
+		async function signJson() {
+			const jsonData = document.getElementById("jsonInput").value.trim();
+			if (!jsonData) {
+				alert("Please enter JSON data.");
+				return;
+			}
+
+			try {
+				const parsedJson = JSON.parse(jsonData); // Validate JSON					
+				const signJSONUrl = "http://localhost:8090/api/getJWS";
+				try {
+					outputFleld.innerHTML = "Wait please ...";
+					responseMessage.innerHTML = "";
+					const response = await fetch(signJSONUrl, {
+						method: "POST",
+						body: JSON.stringify(parsedJson),
+						headers: { 'Accept': 'application/json' }
+					});
+					const responseData = await response.json();
+					if (!response.ok) {
+						throw new Error(responseData.message || "An error occurred");
+					}
+					outputFleld.innerHTML = JSON.stringify(responseData, null, 4);
+				} catch (error) {
+					console.error("Error in client-side request:", error);
+					outputFleld.innerHTML = error.message;
+					alert(error.message);
+				}
+			} catch (error) {
+				alert("Invalid JSON format. Please correct and try again.");
+			}
+		}
+
+		//Verify the signed JSON
+		// This function will be called when the "Verify Signature" button is clicked
+		async function verifyJWS() {
+			const output = document.getElementById("outputField").value.trim();
+			responseMessage.innerHTML = `			<div class="spinner-grow" role="status">
+			  <span class="visually-hidden">Verifying...</span>
+			</div>`;
+			try {
+				var responseJSON = JSON.parse(output);
+				
+				console.log(responseJSON)
+				var signedJWS = responseJSON.jws;
+				if (!signedJWS) {
+                    alert("No Json Web Signature (JWS) found.");
+                    return;
+                }
+				var formData = new FormData();
+				formData.append("jws", signedJWS);
+
+				const verifyJWSUrl = "http://localhost:8090/api/verifyJWS";
+						
+				const response = await fetch(verifyJWSUrl, {
+					method: "POST",
+					body: formData,
+					headers: { 'Accept': 'application/json' }
+				});
+				const responseData = await response.json();
+
+				if (!response.ok) {
+
+					throw new Error(responseData.message || "An error occurred");
+				}
+				//alert(responseData.message);
+				responseMessage.innerHTML = `<div class="alert alert-success d-flex align-items-center" role="alert">
+				  <span class="me-2">✔️</span>
+				  <div>Verified, ${responseData.message}</div>
+				</div>`;//responseData.message;
+				
+			} catch (error) {
+				if (error.message) {
+					alert(error.message);
+				}
+				else {
+					alert("Invalid signed JSON format.");
+				}
+				responseMessage.innerHTML = error.message;
+			}
+		}
+		document.getElementById("signButton").addEventListener("click", signJson);
+		document.getElementById("verifyButton").addEventListener("click", verifyJWS);
+	</script>
+
+	<!-- Prism JS -->
+	<script th:src="@{/js/prism/prism.js}"></script>
+	<script th:src="@{/js/prism/prism-javascript.js}"></script>
+	<script th:src="@{/js/prism/prism-markup.js}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+{
+  "tokens": [
+    {
+      "name": "ePass2003",
+      "vid_pid": "096e:0503",
+	  "match": ["epass", "eps2003", "usbccid"],
+      "windows": "C:\\Windows\\System32\\eps2003csp11v2.dll",
+      "linux": "/usr/lib/libeps2003csp11.so"
+    },
+    {
+      "name": "SafeNet",
+      "vid_pid": "0803:0101",
+	  "match": ["safenet", "etpkcs11"],
+      "windows": "C:\\Windows\\System32\\eTPKCS11.dll",
+      "linux": "/usr/lib/libeTPkcs11.so"
+    },
+    {
+      "name": "TrustKey",
+      "vid_pid": "2ccf:3001",
+	  "match": ["trustkey", "trust key", "2ccf", "pkcs11", "smartcard"],
+      "windows": "C:\\Windows\\System32\\TrustKeyPKCS11.dll",
+      "linux": "/usr/lib/libtrustkey-pkcs11.so"
+    },
+    {
+      "name": "ProxKey",
+      "vid_pid": "1fc9:5002",
+	  "match": ["proxkey", "watchdata", "wdpkcs", "1fc9"],
+      "windows": "C:\\Windows\\System32\\wdpkcs.dll",
+      "linux": "/usr/lib/libproxkeypkcs11.so"
+    },
+	{
+	  "name": "WatchData ProxKey",
+	  "vid_pid": "1fc9:5003",
+	  "match": ["watchdata", "proxkey", "wdpkcs", "1fc9"],
+	  "windows": "C:\\Windows\\System32\\wdpkcs.dll",
+	  "linux": "/usr/lib/libwdpkcs11.so"
+	}
+  ]
+}

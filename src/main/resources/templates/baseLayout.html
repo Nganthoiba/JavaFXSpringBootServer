@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+	<head>
+	    <meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	    <title layout:title-pattern="$TITLE - My App">DigiSignApp</title>
+		<link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+		<link rel="stylesheet" th:href="@{/css/custom.css}" />
+		<link rel="stylesheet" th:href="@{/css/prism/prism.css}" />
+	</head>
+	<body>
+	
+	    <header>
+	        <h1>Site Header</h1>
+	    </header>
+	
+	    <nav>
+	        <p>Navigation bar here</p>
+	    </nav>
+	
+	    <main layout:fragment="content">
+	        <p>Default content (can be overridden)</p>
+	    </main>
+	
+	    <footer>
+	        <p>Site Footer</p>
+	    </footer>
+		<!-- Bootstrap Bundle JS -->
+		<script th:src="@{/js/bootstrap.bundle.js}"></script>
+		
+		<!-- Prism JS -->
+		<script th:src="@{/js/prism/prism.js}"></script>
+		<script th:src="@{/js/prism/prism-javascript.js}"></script>
+		<script th:src="@{/js/prism/prism-markup.js}"></script>
+		
+		<section layout:fragment="scripts">
+		    <!-- Default script block -->
+		</section>
+	</body>
+</html>
