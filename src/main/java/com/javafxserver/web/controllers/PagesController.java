@@ -1,5 +1,7 @@
 package com.javafxserver.web.controllers;
 
+import com.javafxserver.config.Config;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,8 @@ public class PagesController {
 		TokenManager.logoutToken();
 		
 		model.addAttribute("title", "Esign PDF");
+		model.addAttribute("http_port", Config.getHttpPort());
+		model.addAttribute("https_port", Config.getHttpsPort());
         //model.addAttribute("content", "esignPDF"); // Dynamically selects the child template
         
         //return "baseLayout"; // Parent template
@@ -41,23 +45,29 @@ public class PagesController {
 	}
 	
 	@GetMapping("/esignJSON")
-	public String esignJSON() {
+	public String esignJSON(Model model) {
 		// Logout token forcefully if there is already a session
 		TokenManager.logoutToken();
+		model.addAttribute("http_port", Config.getHttpPort());
+		model.addAttribute("https_port", Config.getHttpsPort());
 		return "esignJSON";
 	}
 	
 	@GetMapping("/esignJSON-JWS")
-	public String esignJSONJWS() {
+	public String esignJSONJWS(Model model) {
 		// Logout token forcefully if there is already a session
 		TokenManager.logoutToken();
+		model.addAttribute("http_port", Config.getHttpPort());
+		model.addAttribute("https_port", Config.getHttpsPort());
 		return "esignJSON-JWS";
 	}
 	
 	@GetMapping("/esignXML")
-	public String esignXML() {
+	public String esignXML(Model model) {
 		// Logout token forcefully if there is already a session
 		TokenManager.logoutToken();
+		model.addAttribute("http_port", Config.getHttpPort());
+		model.addAttribute("https_port", Config.getHttpsPort());
 		return "esignXML";
 	}
 }

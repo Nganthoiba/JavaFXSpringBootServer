@@ -253,7 +253,7 @@ public class AppController {
 			responseMap.put("message", "JWS generated successfully.");
 			responseMap.put("jws", jws);
 			
-			//TokenManager.logoutToken();
+			TokenManager.logoutToken();
 			return ResponseEntity.ok()
 					.contentType(MediaType.APPLICATION_JSON)
 					.body(responseMap);

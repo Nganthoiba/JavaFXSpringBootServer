@@ -12,9 +12,12 @@
 </head>
 
 <body>
+	<!-- Hidden fields to store the HTTP and HTTPS ports -->
+	<input type="hidden" th:value="${http_port}" id="http_port"/>
+	<input type="hidden" th:value="${https_port}" id="https_port"/>
 	<div class="container my-2">
 		<a href="/" class="btn btn-secondary mb-3">Back to Home</a>
-		<h3 class="text-center">Digitally Sign JSON and get JSON web Signature</h3>
+		<h3 class="text-center">Digitally sign JSON and get JSON web Signature</h3>
 		<div class="row">
 			<div class="col-sm-6">
 				<div class="mb-3">
@@ -51,10 +54,10 @@
 					<p>To implement the digital signing of JSON content and the get JSON web signature as output, follow these steps:</p>
 					<ol>
 						<li>Ensure you have a valid JSON content to sign.</li>
-						<li>Use the provided API endpoint <code>http://localhost:8090/api/getJWS</code> or
-							<code>https://localhost:8443/api/getJWS</code> for signng the JSON and 
-							<code>http://localhost:8090/api/verifyJWS</code> or
-							<code>https://localhost:8443/api/verifyJWS</code>
+						<li>Use the provided API endpoint <code>http://localhost:<span th:text="${http_port}"></span>/api/getJWS</code> or
+							<code>https://localhost:<span th:text="${https_port}"></span>/api/getJWS</code> for signng the JSON and 
+							<code>http://localhost:<span th:text="${http_port}"></span>/api/verifyJWS</code> or
+							<code>https://localhost:<span th:text="${https_port}"></span>/api/verifyJWS</code>
 							for verifying JSON Web Signature
 							respectively.
 						</li>
@@ -99,7 +102,8 @@ async function signJson() {
 
     try {
         const parsedJson = JSON.parse(jsonData); // Validate JSON					
-        const signJSONUrl = "http://localhost:8090/api/getJWS";
+        const signJSONUrl = "http://localhost:<span th:text="${http_port}"></span>/api/getJWS";
+		// Or you can replace with https://localhost:<span th:text="${https_port}"></span>/api/getJWS
         try {
             outputFleld.innerHTML = "Wait please ...";
             const response = await fetch(signJSONUrl, {
@@ -140,7 +144,8 @@ async function verifyJWS() {
 		var formData = new FormData();
 		formData.append("jws", signedJWS);
 
-		const verifyJWSUrl = "http://localhost:8090/api/verifyJWS";
+		const verifyJWSUrl = "http://localhost:<span th:text="${http_port}"></span>/api/verifyJWS";
+		// Or you can replace with http://localhost:<span th:text="${http_port}"></span>/api/verifyJWS
 				
 		const response = await fetch(verifyJWSUrl, {
 			method: "POST",
@@ -178,6 +183,9 @@ document.getElementById("verifyButton").addEventListener("click", verifyJWS);
 	<script>
 		const responseMessage = document.getElementById("responseMessage");
 		var outputFleld = document.getElementById("outputField");
+		var httpPort = document.getElementById("http_port").value;
+		var httpsPort = document.getElementById("https_port").value;
+		
 		async function signJson() {
 			const jsonData = document.getElementById("jsonInput").value.trim();
 			if (!jsonData) {
@@ -187,7 +195,7 @@ document.getElementById("verifyButton").addEventListener("click", verifyJWS);
 
 			try {
 				const parsedJson = JSON.parse(jsonData); // Validate JSON					
-				const signJSONUrl = "http://localhost:8090/api/getJWS";
+				const signJSONUrl = `http://localhost:${httpPort}/api/getJWS`;
 				try {
 					outputFleld.innerHTML = "Wait please ...";
 					responseMessage.innerHTML = "";
@@ -215,7 +223,7 @@ document.getElementById("verifyButton").addEventListener("click", verifyJWS);
 		// This function will be called when the "Verify Signature" button is clicked
 		async function verifyJWS() {
 			const output = document.getElementById("outputField").value.trim();
-			responseMessage.innerHTML = `			<div class="spinner-grow" role="status">
+			responseMessage.innerHTML = `<div class="spinner-grow" role="status">
 			  <span class="visually-hidden">Verifying...</span>
 			</div>`;
 			try {
@@ -251,12 +259,20 @@ document.getElementById("verifyButton").addEventListener("click", verifyJWS);
 				
 			} catch (error) {
 				if (error.message) {
-					alert(error.message);
+					//alert(error.message);
+					responseMessage.innerHTML = `<div class="alert alert-error d-flex align-items-center" role="alert">
+												  <span class="me-2">✖️</span>
+												  <div>Oops, ${error.message}.</div>
+												</div>`;
 				}
 				else {
-					alert("Invalid signed JSON format.");
+					//alert("Invalid signed JSON format.");
+					responseMessage.innerHTML = `<div class="alert alert-error d-flex align-items-center" role="alert">
+												  <span class="me-2">✖️</span>
+												  <div>Invalid signed JSON format.</div>
+												</div>`;
 				}
-				responseMessage.innerHTML = error.message;
+				//responseMessage.innerHTML = error.message;
 			}
 		}
 		document.getElementById("signButton").addEventListener("click", signJson);

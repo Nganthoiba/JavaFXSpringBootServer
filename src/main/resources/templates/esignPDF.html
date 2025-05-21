@@ -14,6 +14,9 @@
 	</head>
 
 	<body>
+		<!-- Hidden fields to store the HTTP and HTTPS ports -->
+		<input type="hidden" th:value="${http_port}" id="http_port"/>
+		<input type="hidden" th:value="${https_port}" id="https_port"/>
 		<div class="container">
 			<a href="/" class="btn btn-secondary mb-3">Back to Home</a>
 			<h3 class="text-center">Upload PDF File to be Digitally Signed</h3>
@@ -29,7 +32,7 @@
 										aria-label="Upload PDF File">
 								</div>
 								<div class="form-group mb-3">
-									<label>Set coordinates for signature:</label>
+									<label>Set coordinates for signature stamp:</label>
 									<div class="d-flex gap-3">
 										<div>
 											<label for="x">X:</label>
@@ -85,8 +88,8 @@
 						<p>To implement the digital signing of PDF content, follow these steps:</p>
 						<ol>
 							<li>Ensure you have a valid PDF file to sign.</li>
-							<li>Use the provided API endpoint <code>http://localhost:8090/api/esignPDF</code> or
-								<code>https://localhost:8443/api/esignPDF</code> to send the PDF
+							<li>Use the provided API endpoint <code>http://localhost:<span th:text="${http_port}"></span>/api/esignPDF</code> or
+								<code>https://localhost:<span th:text="${https_port}"></span>/api/esignPDF</code> to send the PDF
 								file.
 							</li>
 							<li>The API will return the signed PDF content.</li>
@@ -96,28 +99,34 @@
 						<h6>HTML Section</h6>
 						<pre>
 							<code class="language-html">
-&lt;form id=&quot;esignPdfForm&quot; action=&quot;http://localhost:8090/api/esignPDF&quot; method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;
+&lt;form id=&quot;esignPdfForm&quot; action=&quot;http://localhost:<span th:text="${http_port}"></span>/api/esignPDF&quot; 
+method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot;&gt;
 	&lt;div class=&quot;form-group mb-3&quot;&gt;
 		&lt;label for=&quot;file&quot;&gt;Select file to upload:&lt;/label&gt;
-		&lt;input type=&quot;file&quot; id=&quot;file&quot; name=&quot;pdf_file&quot; accept=&quot;.pdf&quot; required class=&quot;form-control&quot;
+		&lt;input type=&quot;file&quot; id=&quot;file&quot; name=&quot;pdf_file&quot; 
+		accept=&quot;.pdf&quot; required 
+		class=&quot;form-control&quot;
 			aria-label=&quot;Upload PDF File&quot;&gt;
 	&lt;/div&gt;
 	&lt;div class=&quot;form-group mb-3&quot;&gt;
-		&lt;label&gt;Set coordinates for signature:&lt;/label&gt;
+		&lt;label&gt;Set coordinates for signature stamp:&lt;/label&gt;
 		&lt;div class=&quot;d-flex gap-3&quot;&gt;
 			&lt;div&gt;
 				&lt;label for=&quot;x&quot;&gt;X:&lt;/label&gt;
-				&lt;input type=&quot;number&quot; id=&quot;x&quot; name=&quot;x&quot; value=&quot;340&quot; class=&quot;form-control&quot;&gt;
+				&lt;input type=&quot;number&quot; id=&quot;x&quot; name=&quot;x&quot; 
+				value=&quot;340&quot; class=&quot;form-control&quot;&gt;
 			&lt;/div&gt;
 			&lt;div&gt;
 				&lt;label for=&quot;y&quot;&gt;Y:&lt;/label&gt;
-				&lt;input type=&quot;number&quot; id=&quot;y&quot; name=&quot;y&quot; value=&quot;760&quot; class=&quot;form-control&quot;&gt;
+				&lt;input type=&quot;number&quot; id=&quot;y&quot; name=&quot;y&quot; 
+				value=&quot;760&quot; class=&quot;form-control&quot;&gt;
 			&lt;/div&gt;
 		&lt;/div&gt;
 	&lt;/div&gt;
 	&lt;div class=&quot;form-group mb-3&quot;&gt;
 		&lt;label for=&quot;file&quot;&gt;Page number where the signature will appear:&lt;/label&gt;
-		&lt;input type=&quot;number&quot; id=&quot;pageNo&quot; name=&quot;pageNo&quot; value=&quot;1&quot; class=&quot;form-control&quot;&gt;
+		&lt;input type=&quot;number&quot; id=&quot;pageNo&quot; name=&quot;pageNo&quot; 
+		value=&quot;1&quot; class=&quot;form-control&quot;&gt;
 	&lt;/div&gt;
 	&lt;div class=&quot;form-group mb-3&quot;&gt;
 		&lt;label for=&quot;location&quot;&gt;Reason:&lt;/label&gt;
@@ -178,8 +187,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			const observer = new IntersectionObserver(entries => {
 				entries.forEach(entry => {
 					if (entry.isIntersecting) {
-						iframe.style.display = "block";  // Reveal iframe when in view
-						observer.disconnect();  // Stop observing once loaded
+						iframe.style.display = "block";// Reveal iframe when in view
+						observer.disconnect(); // Stop observing once loaded
 					}
 				});
 			});
@@ -205,6 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		<script th:src="@{/js/bootstrap.bundle.js}" defer></script>
 		<script>
+			
 			document.addEventListener("DOMContentLoaded", () => {
 				const esignPdfForm = document.getElementById("esignPdfForm");
 

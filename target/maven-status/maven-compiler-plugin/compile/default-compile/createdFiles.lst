@@ -19,8 +19,8 @@ com\javafxserver\MainApp.class
 com\javafxserver\utils\LogWriter.class
 com\javafxserver\config\AppConfig.class
 com\javafxserver\fxcontrollers\SettingDialogExample.class
-com\javafxserver\digitalsigner\Epass2003PDFSigner$1.class
 com\javafxserver\web\controllers\AppController.class
+com\javafxserver\digitalsigner\PKCS11RSASSASigner.class
 com\javafxserver\exceptions\SunPKCS11NotFoundException.class
 com\javafxserver\ui\PinPrompt.class
 com\javafxserver\digitalsigner\JnaPkcs11.class
@@ -37,6 +37,7 @@ com\javafxserver\digitalsigner\Rectangle.class
 com\javafxserver\service\TokenService.class
 com\javafxserver\exceptions\NoCertificateChainException.class
 com\javafxserver\digitalsigner\SignatureDetail.class
+com\javafxserver\utils\ResponseBuilder.class
 com\javafxserver\utils\FileContext.class
 com\javafxserver\service\CorsService.class
 com\javafxserver\exceptions\DigitalSigningException.class
@@ -54,13 +55,12 @@ com\javafxserver\utils\UIUtils.class
 com\javafxserver\utils\ConvertFile.class
 com\javafxserver\utils\HexDecoder.class
 com\javafxserver\proxyserver\ProxyServer.class
-com\javafxserver\digitalsigner\Epass2003PDFSigner.class
 com\javafxserver\fxcontrollers\MainViewController$1.class
 com\javafxserver\config\WebConfig.class
+com\javafxserver\execptionhandler\GlobalExceptionHandler.class
 com\javafxserver\config\Config.class
 com\javafxserver\digitalsigner\JSONSigner.class
 com\javafxserver\digitalsigner\TimeStampDataConvertor.class
-com\javafxserver\digitalsigner\CreateVisibleSignature2.class
 com\javafxserver\service\TokenMonitorService$TokenLostCallback.class
 com\javafxserver\digitalsigner\XMLSigner.class
 com\javafxserver\config\TomcatConfig.class

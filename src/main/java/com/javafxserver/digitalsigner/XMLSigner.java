@@ -9,7 +9,6 @@ import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.spec.*;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.util.Enumeration;
 import java.util.List;
 import java.io.*;
 import javax.xml.parsers.*;
@@ -20,7 +19,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.*;
 
-import com.javafxserver.config.Config;
 import com.javafxserver.service.TokenService;
 
 public class XMLSigner {
@@ -66,15 +64,14 @@ public class XMLSigner {
                 fac.newSignatureMethod(SignatureMethod.RSA_SHA256, null),
                 List.of(ref)
         );
-
-        // Retrieve private key and certificate from the Keystore
-        KeyStore ks = tokenService.getKeyStore();
-        String alias = getFirstKeyAlias(ks);
-        PrivateKey privateKey = (PrivateKey) ks.getKey(alias, Config.PIN.toCharArray());
-        X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+        
+        
+        // Retrieve private key and certificate chain from the TokenService
+        PrivateKey privateKey = tokenService.getPrivateKey();
+        List<X509Certificate> chertChain = tokenService.getX509CertificateChain(); 
 
         KeyInfoFactory kif = fac.getKeyInfoFactory();
-        KeyInfo ki = kif.newKeyInfo(List.of(kif.newX509Data(List.of(cert))));
+        KeyInfo ki = kif.newKeyInfo(List.of(kif.newX509Data(chertChain)));
 
         // Create the XMLSignature
         DOMSignContext dsc = new DOMSignContext(privateKey, doc.getDocumentElement());
@@ -93,16 +90,5 @@ public class XMLSigner {
         }
 
         return outputStream.toByteArray();
-    }
-
-    private static String getFirstKeyAlias(KeyStore ks) throws Exception {
-        Enumeration<String> aliases = ks.aliases();
-        while (aliases.hasMoreElements()) {
-            String alias = aliases.nextElement();
-            if (ks.isKeyEntry(alias)) {
-                return alias;
-            }
-        }
-        throw new Exception("No suitable key entry found in token");
     }
 }

@@ -13,6 +13,10 @@
 
 <body>
 	<div class="container my-2">
+		<!-- Hidden fields to store the HTTP and HTTPS ports -->
+		<input type="hidden" th:value="${http_port}" id="http_port"/>
+		<input type="hidden" th:value="${https_port}" id="https_port"/>
+		
 		<a href="/" class="btn btn-secondary mb-3">Back to Home</a>
 		<h3 class="text-center">Digitally Sign JSON</h3>
 		<div class="row">
@@ -22,7 +26,7 @@
 					<textarea id="jsonInput" class="form-control" rows="15" placeholder="Enter valid JSON here..."></textarea>
 				</div>
 
-				<div class="d-flex gap-3">
+				<div class="d-flex gap-3 mt-2">
 					<button id="signButton" class="btn btn-primary">Sign JSON</button>
 					<button id="verifyButton" class="btn btn-success">Verify Signature</button>
 					<!-- Button trigger modal for showing developer's guide line for implementation of digitally signing XML content -->
@@ -34,6 +38,7 @@
 			<div class="col-sm-6">
 				<label for="outputField" class="form-label">Signed JSON Output:</label>
 				<textarea id="outputField" class="form-control" rows="15" readonly></textarea>
+				<div id="responseMessage" class="mt-2"></div>
 			</div>
 		</div>
 	</div>
@@ -50,8 +55,8 @@
 					<p>To implement the digital signing of JSON content, follow these steps:</p>
 					<ol>
 						<li>Ensure you have a valid JSON content to sign.</li>
-						<li>Use the provided API endpoint <code>http://localhost:8090/api/esignJSON</code> or
-							<code>https://localhost:8443/api/verifyWholeJSON</code> for signing and verifying JSON data
+						<li>Use the provided API endpoint <code>http://localhost:<span th:text="${http_port}"></span>/api/esignJSON</code> or
+							<code>https://localhost:<span th:text="${https_port}"></span>/api/verifyWholeJSON</code> for signing and verifying JSON data
 							respectively.
 						</li>
 						<li>Make sure to handle the response correctly and display any errors that may occur.</li>
@@ -95,7 +100,8 @@ async function signJson() {
 
     try {
         const parsedJson = JSON.parse(jsonData); // Validate JSON					
-        const signJSONUrl = "http://localhost:8090/api/esignJSON";
+        const signJSONUrl = "http://localhost:<span th:text="${http_port}"></span>/api/esignJSON";
+		// You can replace with https://localhost:<span th:text="${https_port}"></span>/api/esignJSON
         try {
             outputFleld.innerHTML = "Wait please ...";
             const response = await fetch(signJSONUrl, {
@@ -130,7 +136,8 @@ async function verifyJson() {
 
 	try {
 
-		const verifyWholeJsonUrl = "http://localhost:8090/api/verifyWholeJSON";
+		const verifyWholeJsonUrl = "http://localhost:<span th:text="${http_port}"></span>/api/verifyWholeJSON";
+		// Or you can replace with https://localhost:<span th:text="${https_port}"></span>/api/verifyWholeJSON
 		const parsedSignedJson = JSON.parse(signedJson);
 		if (parsedSignedJson.signature) {
 			const response = await fetch(verifyWholeJsonUrl, {
@@ -169,7 +176,10 @@ document.getElementById("verifyButton").addEventListener("click", verifyJson);
 	<!-- Bootstrap Bundle JS -->
 	<script th:src="@{/js/bootstrap.bundle.js}"></script>
 	<script>
+		const responseMessage = document.getElementById("responseMessage");
 		var outputFleld = document.getElementById("outputField");
+		var httpPort = document.getElementById("http_port").value;
+		var httpsPort = document.getElementById("https_port").value;
 		async function signJson() {
 			const jsonData = document.getElementById("jsonInput").value.trim();
 			if (!jsonData) {
@@ -179,9 +189,10 @@ document.getElementById("verifyButton").addEventListener("click", verifyJson);
 
 			try {
 				const parsedJson = JSON.parse(jsonData); // Validate JSON					
-				const signJSONUrl = "http://localhost:8090/api/esignJSON";
+				const signJSONUrl = `http://localhost:${httpPort}/api/esignJSON`;
 				try {
 					outputFleld.innerHTML = "Wait please ...";
+					responseMessage.innerHTML = "";
 					const response = await fetch(signJSONUrl, {
 						method: "POST",
 						body: JSON.stringify(parsedJson),
@@ -210,10 +221,12 @@ document.getElementById("verifyButton").addEventListener("click", verifyJson);
 				alert("No signed JSON found.");
 				return;
 			}
-
+			responseMessage.innerHTML = `<div class="spinner-grow" role="status">
+						  <span class="visually-hidden">Verifying...</span>
+						</div>`;
 			try {
 
-				const verifyWholeJsonUrl = "http://localhost:8090/api/verifyWholeJSON";
+				const verifyWholeJsonUrl = `http://localhost:${httpPort}/api/verifyWholeJSON`;
 				const parsedSignedJson = JSON.parse(signedJson);
 				if (parsedSignedJson.signature) {
 					const response = await fetch(verifyWholeJsonUrl, {
@@ -227,17 +240,33 @@ document.getElementById("verifyButton").addEventListener("click", verifyJson);
 
 						throw new Error(responseData.message || "An error occurred");
 					}
-					alert(responseData.message);
+					//alert(responseData.message);
+					responseMessage.innerHTML = `<div class="alert alert-success d-flex align-items-center" role="alert">
+									  <span class="me-2">✔️</span>
+									  <div>Verified, ${responseData.message}</div>
+									</div>`;
 
 				} else {
-					alert("Signature verification failed.");
+					responseMessage.innerHTML = `<div class="alert alert-error d-flex align-items-center" role="alert">
+												  <span class="me-2">✖️</span>
+												  <div>Oops, Signature verification failed.</div>
+												</div>`;
+					//alert("Signature verification failed.");
 				}
 			} catch (error) {
 				if (error.message) {
-					alert(error.message);
+					//alert(error.message);
+					responseMessage.innerHTML = `<div class="alert alert-error d-flex align-items-center" role="alert">
+												  <span class="me-2">✖️</span>
+												  <div>Oops, ${error.message}.</div>
+												</div>`;
 				}
 				else {
-					alert("Invalid signed JSON format.");
+					//alert("Invalid signed JSON format.");
+					responseMessage.innerHTML = `<div class="alert alert-error d-flex align-items-center" role="alert">
+												  <span class="me-2">✖️</span>
+												  <div>Invalid signed JSON format.</div>
+												</div>`;
 				}
 			}
 		}

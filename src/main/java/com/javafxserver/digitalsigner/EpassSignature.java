@@ -3,8 +3,6 @@ package com.javafxserver.digitalsigner;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.*;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
 
@@ -18,8 +16,6 @@ import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
-import org.bouncycastle.tsp.TimeStampToken;
-
 import com.javafxserver.exceptions.DigitalSigningException;
 import com.javafxserver.exceptions.NoCertificateChainException;
 import com.javafxserver.exceptions.NoCertificateFoundException;
@@ -65,7 +61,7 @@ public class EpassSignature implements SignatureInterface {
             PrivateKey privateKey = (PrivateKey) tokenService.getKeyStore().getKey(alias, pin.toCharArray());
             X509Certificate userCert = (X509Certificate) tokenService.getKeyStore().getCertificate(alias);
 
-            //Certificate[] certChain = tokenService.getKeyStore().getCertificateChain(alias);
+            
             List<X509Certificate> fullChain = tokenService.getX509CertificateChain();
 
             System.out.println("Certificate Chain:");
